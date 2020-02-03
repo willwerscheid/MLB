@@ -1,0 +1,175 @@
+---
+title: "HR/FB Rates"
+author: "Jason Willwerscheid"
+date: "2/2/2020"
+output:
+  workflowr::wflow_html:
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Here I test Ben Clemens's [observation](https://blogs.fangraphs.com/for-your-enjoyment-a-home-run-rate-refresher/) that pitchers have little to no control over HR/FB (home run per fly ball) rates. I consider all pitches thrown during the 2017, 2018, and 2019 seasons.
+
+```{r scrape, message = FALSE}
+library(tidyverse)
+library(lme4)
+
+# library(baseballr)
+
+# First the data needs to be scraped. The 2017 data, for example, can be
+#   obtained as follows:
+
+# season_begin <- as.Date("2017-04-02")
+# season_end <- as.Date("2017-11-01")
+#
+# dat <- tibble()
+# start_date <- season_begin
+# while (start_date <= season_end) {
+#   cat("Start Date:", format(start_date, "%m-%d-%y"), "\n")
+#   dat <- dat %>%
+#     bind_rows(scrape_statcast_savant_batter_all(start_date = start_date,
+#                                                 end_date = start_date + 6))
+#   start_date <- start_date + 7
+# }
+# saveRDS(dat, "mlb2017data.rds")
+
+dat <- readRDS("data/mlb2017data.rds") %>%
+  bind_rows(readRDS("data/mlb2018data.rds")) %>%
+  bind_rows(readRDS("data/mlb2019data.rds"))
+```
+
+I want to model fly balls using a GLMM (generalized linear mixed model). Since I'd like to model batter and pitcher effects as normally distributed, I think it's best to discard probable outliers consisting of pitchers' plate appearances and position players' appearances on the mound. I define a player as a pitcher if he throws more pitches than he faces (using this definition, Ohtani gets classified as a batter).
+
+```{r outliers}
+p.cts <- dat %>%
+  group_by(pitcher) %>%
+  summarize(n = n())
+b.cts <- dat %>%
+  group_by(batter) %>%
+  summarize(n = n())
+pitchers <- p.cts %>%
+  left_join(b.cts, by = c("pitcher" = "batter"), suffix = c(".p", ".b")) %>%
+  filter(is.na(n.b) | n.p > n.b) %>%
+  pull(pitcher)
+
+dat <- dat %>%
+  filter(pitcher %in% pitchers & !(batter %in% pitchers))
+```
+
+To test Clemens's observation, I compare fits with and without a pitcher effect. To control for the "juiced ball" of 2019, I add a fixed effect for season. I control for park and batter via random effects. For now, I add a slope to the park effect that allows for different park factors for left- and right-handed batters.
+
+```{r fit}
+flies <- dat %>%
+  filter(bb_type == "fly_ball") %>%
+  mutate(HR = 1L * (events == "home_run"),
+         year = format.Date(game_date, "%Y"),
+         batter = player_name) %>%
+  mutate_at(vars(batter, pitcher, stand, year), as.factor)
+
+# LAA and ARI modified their parks in 2018, so treat the parks as different.
+flies <- flies %>%
+  mutate(park = factor(ifelse(home_team %in% c("LAA", "ARI") & year == 2017,
+                              paste0(home_team, year),
+                              home_team))) %>%
+  select(batter, pitcher, HR, park, stand, year)
+
+glm.full <- glmer(
+  formula = cbind(HR, 1 - HR) ~ -1 + year + (stand | park) + (1 | pitcher) + (1 | batter),
+  data = flies,
+  family = binomial,
+  nAGQ = 0,
+  control = glmerControl(optimizer = "nloptwrap")
+)
+
+glm.nopitcher <- update(
+  glm.full,
+  formula = cbind(HR, 1 - HR) ~ -1 + year + (stand | park) + (1 | batter)
+)
+
+anova(glm.full, glm.nopitcher)
+```
+
+As Clemens intimates, the pitcher effect is insignificant and can be removed from the model. It also turns out that park factors don't significantly differ for left- and right-handed batters:
+
+```{r fit2}
+glm.nohanded <- update(
+  glm.nopitcher,
+  formula = cbind(HR, 1 - HR) ~ -1 + year + (1 | park) + (1 | batter)
+)
+
+anova(glm.nopitcher, glm.nohanded)
+```
+
+The final fitted model (with fixed effects for season and random effects for park and batter) agrees with the general consensus that both the 2019 ball and, to a lesser extent, the 2017 ball were "juiced." I include 90% Wald intervals:
+
+```{r plot.year}
+glm.fit <- glm.nohanded
+
+# Plot "base" probabilities by year:
+year.fx <- tibble(year = factor(2017:2019),
+                  coef = fixef(glm.fit),
+                  CI.lower = coef + qnorm(0.05) * sqrt(diag(vcov(glm.fit))),
+                  CI.upper = coef + qnorm(0.95) * sqrt(diag(vcov(glm.fit)))) %>%
+  mutate_at(vars(coef, CI.lower, CI.upper), ~ 1 / (1 + exp(-.)))
+
+ggplot(year.fx, aes(x = year, y = coef)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = CI.lower, ymax = CI.upper), width = 0.2) +
+  labs(x = "Year", y = "HR/FB") +
+  ggtitle("HR/FB rates by year (for an average hitter, in an average park)")
+```
+
+Next I plot the estimated park factors (again with 90% Wald intervals). At Coors Field (COL), for example, a batter will on average hit around 10-25% more home runs than at an average park, while he will on average hit around 15-30% fewer home runs at Oracle Park (SF). (For concreteness, T-Mobile Park (SEA) can probably be thought of as an "average" park.)
+
+```{r plot.park}
+park.factors <- tibble(park = rownames(ranef(glm.fit)$park),
+                       coef = drop(as.matrix(ranef(glm.fit)$park))) %>%
+  mutate(coef = coef + fixef(glm.fit)["year2019"],
+         CI.lower = coef + qnorm(0.05) * sqrt(drop(attr(ranef(glm.fit)$park, "postVar"))),
+         CI.upper = coef + qnorm(0.95) * sqrt(drop(attr(ranef(glm.fit)$park, "postVar")))) %>%
+  mutate_at(vars(coef, CI.lower, CI.upper), ~ 1 / (1 + exp(-.))) %>%
+  mutate_at(vars(coef, CI.lower, CI.upper), ~ . * (1 + exp(-fixef(glm.fit)["year2019"]))) %>%
+  arrange(coef)
+
+ggplot(park.factors, aes(x = park, y = coef)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = CI.lower, ymax = CI.upper), width = 0.2) +
+  labs(x = NULL, y = NULL) +
+  scale_x_discrete(limits = park.factors %>% pull(park)) +
+  coord_flip() +
+  ggtitle("Park factors")
+```
+
+Finally, I plot the batters with the best and worst estimated HR/FB rates (once again with 90% confidence intervals). In each case, the rate corresponds to the batter's estimated HR/FB rate when hitting the 2019 ball in an average park:
+
+```{r batters}
+n <- 40
+bat.fx <- tibble(batter = rownames(ranef(glm.fit)$batter),
+                 coef = drop(as.matrix(ranef(glm.fit)$batter))) %>%
+  mutate(coef = coef + fixef(glm.fit)["year2019"],
+         CI.lower = coef + qnorm(0.05) * sqrt(drop(attr(ranef(glm.fit)$batter, "postVar"))),
+         CI.upper = coef + qnorm(0.95) * sqrt(drop(attr(ranef(glm.fit)$batter, "postVar")))) %>%
+  mutate_at(vars(coef, CI.lower, CI.upper), ~ 1 / (1 + exp(-.))) %>%
+  arrange(coef)
+
+ggplot(bat.fx %>% top_n(n, coef), aes(x = batter, y = coef)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = CI.lower, ymax = CI.upper), width = 0.2) +
+  labs(x = NULL, y = NULL) +
+  scale_x_discrete(limits = bat.fx %>% top_n(n, coef) %>% pull(batter)) +
+  lims(y = c(0, 0.5)) +
+  coord_flip() +
+  ggtitle("Top HR/FB rates")
+
+ggplot(bat.fx %>% top_n(n, -coef), aes(x = batter, y = coef)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = CI.lower, ymax = CI.upper), width = 0.2) +
+  labs(x = NULL, y = NULL) +
+  scale_x_discrete(limits = bat.fx %>% top_n(n, -coef) %>% pull(batter)) +
+  lims(y = c(0, 0.5)) +
+  coord_flip() +
+  ggtitle("Bottom HR/FB rates")
+```
