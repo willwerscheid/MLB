@@ -1,5 +1,5 @@
 ---
-title: "Count-specific wOBACON"
+title: "Count-specific wOBA values"
 author: "Jason Willwerscheid"
 date: "2/20/2020"
 output: html_document
