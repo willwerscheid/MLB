@@ -1,0 +1,115 @@
+---
+title: "Count-specific wOBACON"
+author: "Jason Willwerscheid"
+date: "2/20/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## wOBACON
+
+To account for the juicier balls of 2017 and 2019, I calculate wOBACON (the expected wOBA conditional on the ball being put into play) on a per-year basis:
+
+```{r wobacon}
+suppressMessages(library(tidyverse))
+
+all_pitches <- readRDS("output/mlb_preproc.rds")
+
+wobacon <- all_pitches %>%
+  filter(contact == 1 & foul == 0) %>%
+  group_by(game_year) %>%
+  summarize(wOBACON = sum(woba_value) / sum(woba_denom))
+knitr::kable(wobacon, digits = 3)
+```
+
+## Count-specific wOBA
+
+I also calculate expected wOBA conditional on the pitch count (the idea is described in Tango, Lichtman, and Dolphin). I want these on a per-year basis as well, but for less frequent pitch counts like 3-0, the standard errors associated with the empirical means are a bit too large for my taste. Thus I make the additional assumption that year-to-year differences are constant across pitch counts. (I could have also assumed that the ratios are constant, but differences are easier to interpret.) I give the complete table below: one can verify that the fitted wOBA values are all very reasonable given the empirical wOBAs and SEs, and they have the convenient property that 2017 values are all one point higher than 2019 values, which are in turn 8 points higher than 2018 values.
+
+```{r count_woba}
+count_woba <- all_pitches %>%
+  group_by(game_year, balls, strikes) %>%
+  summarize(empirical_wOBA = sum(pa_woba_value) / sum(pa_woba_denom),
+            empirical_SE = sd(pa_woba_value[pa_woba_denom > 0]) / sqrt(sum(pa_woba_denom))) %>%
+  ungroup() %>%
+  arrange(balls, strikes, game_year)
+
+lm_fit <- lm(pa_woba_value ~ factor(game_year) + factor(balls)*factor(strikes), 
+             data = filter(all_pitches, pa_woba_denom > 0))
+lm_preds <- predict(lm_fit, newdata = count_woba)
+count_woba <- count_woba %>%
+  mutate(fitted_wOBA = lm_preds, 
+         diff = fitted_wOBA - empirical_wOBA)
+
+knitr::kable(count_woba, digits = 3)  
+```
+
+## wOBA values for pitch events
+
+Finally, I calculate the value of a ball, strike, foul ball, and hit into play conditional on the pitch count. 
+
+For example, let the count be 0-2, which in 2019 is associated with an expected wOBA of 0.213. A ball will bring the count to 1-2, which has a wOBA of 0.234, so the value of a ball at 0-2 is 0.021. (And, due to the convenient assumption I made above, this value is constant from year to year.) A strike will result in a strikeout, which brings the wOBA down to zero: thus the value of a strike at 0-2 is -0.213. A foul ball does not change the count, so its value is zero. Finally, putting the ball into play brings the wOBA up to 0.404 (the wOBACON for 2019), so its value is 0.191. The complete table is below.
+
+```{r event_vals}
+event_vals <- count_woba %>%
+  rename(wOBA = fitted_wOBA) %>%
+  select(game_year, balls, strikes, wOBA)
+
+helper_df <- tibble(balls = 4, strikes = 0:2, wOBA = 1, dummy = 1) %>%
+  bind_rows(tibble(strikes = 3, balls = 0:3, wOBA = 0, dummy = 1)) %>%
+  full_join(tibble(game_year = 2017:2019, dummy = 1), by = "dummy") %>%
+  select(-dummy)
+
+event_vals <- event_vals %>%
+  bind_rows(helper_df) 
+event_vals <- event_vals %>%
+  left_join(event_vals, by = "game_year", suffix = c("", "_next")) %>%
+  filter((balls_next == balls + 1 & strikes_next == strikes)
+         | (strikes_next == strikes + 1 & balls_next == balls)) %>%
+  mutate(event = ifelse(strikes_next == strikes + 1, "strike", "ball"), 
+         wOBA_change = wOBA_next - wOBA) %>%
+  filter(balls < 4, strikes < 3) %>%
+  select(game_year, balls, strikes, wOBA, event, wOBA_change) %>%
+  spread(key = "event", value = "wOBA_change") %>%
+  rename(strike_value = strike, ball_value = ball)
+  
+# Foul balls:
+event_vals <- event_vals %>%
+  mutate(foul_value = ifelse(strikes == 2, 0, strike_value))
+
+# Hit into play:
+event_vals <- event_vals %>%
+  left_join(wobacon, by = "game_year") %>%
+  mutate(HIP_value = wOBACON - wOBA)
+
+event_vals <- event_vals %>%
+  select(-wOBA, -wOBACON) %>%
+  arrange(balls, strikes, game_year)
+
+knitr::kable(event_vals, digits = 3)
+```
+
+## Visualizations of 2019 values
+
+I prefer visualizations to tables, so I include a visualization of event values for 2019. Results are more or less as expected: a strike is much more valuable when it's the third strike (and especially so at 3-2); a ball is more valuable when it's the fourth ball (and again, especially so at 3-2); and putting the ball into play is more valuable when it's a pitcher's count. Interestingly, a batter is better off taking a strike at 3-0 than putting the ball into play. The implication is that an average hitter should *never* swing at a 3-0 pitch.
+
+```{r viz}
+plot_df <- event_vals %>%
+  filter(game_year == 2019) %>%
+  gather(key = "event", value = "value", -game_year, -balls, -strikes) %>%
+  mutate(event = str_remove(event, "_value"))
+
+ggplot(plot_df, 
+       aes(x = strikes, y = balls, fill = value)) +
+  geom_tile() +
+  theme_minimal() +
+  scale_fill_gradient2(low = "red", high = "green") +
+  facet_wrap(~event, nrow = 2, ncol = 2)
+```
+
+```{r save_res}
+saveRDS(all_pitches, "output/count_woba.rds")
+```
