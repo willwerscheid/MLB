@@ -170,7 +170,6 @@ paste0(round(100 * (prev_nrow - nrow(all_pitches)) / prev_nrow, 1),
 Finally, I refactor some variables, remove others, and save the results to file.
 
 ```{r save_data, eval = FALSE}
-# Not run:
 all_pitches <- all_pitches %>%
   mutate(swing = 1L - (description %in% c("ball", "blocked_ball", "called_strike")),
          contact = 1L * (description == "foul" | str_starts(description, "hit_into_play")),
