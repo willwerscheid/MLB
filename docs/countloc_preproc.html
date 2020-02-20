@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Jason Willwerscheid" />
+
+
+<title>Preprocessing</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">MLB</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Preprocessing</h1>
+<h4 class="author">Jason Willwerscheid</h4>
+<h4 class="date">2/20/2020</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#report"> Report <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2020-02-20
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>MLB/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.2.0). The <em>Report</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="report" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20200202code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20200202)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20200202code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20200202)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtree264abcf35bfbedb229b6e5ac6c6236e5b748101atargetblank264abcfa"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/MLB/tree/264abcf35bfbedb229b6e5ac6c6236e5b748101a" target="_blank">264abcf</a> </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtree264abcf35bfbedb229b6e5ac6c6236e5b748101atargetblank264abcfa" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .RData
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    data/mlb2017data.rds
+    Ignored:    data/mlb2018data.rds
+    Ignored:    data/mlb2019data.rds
+
+Untracked files:
+    Untracked:  .DS_Store
+    Untracked:  code/BBrates.R
+    Untracked:  code/park_factors.R
+    Untracked:  code/xBB.R
+    Untracked:  data/.DS_Store
+    Untracked:  data/SteamerProjBatters2019.csv
+    Untracked:  data/exit_velocity-2018.csv
+    Untracked:  data/exit_velocity-2019.csv
+    Untracked:  data/expected_stats-2018.csv
+    Untracked:  data/expected_stats-2019.csv
+    Untracked:  data/fangraphs-2018.csv
+    Untracked:  data/fangraphs-2019.csv
+    Untracked:  data/standard2015NP.csv
+    Untracked:  data/standard2016.csv
+    Untracked:  data/standard2016NP.csv
+    Untracked:  data/standard2017.csv
+    Untracked:  data/standard2017NP.csv
+    Untracked:  data/standard2018.csv
+    Untracked:  data/standard2018NP.csv
+    Untracked:  data/standard2019.csv
+    Untracked:  data/standard2019NP.csv
+    Untracked:  output/mlb_preproc.rds
+
+Unstaged changes:
+    Modified:   .gitignore
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the R Markdown and HTML files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view them.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/willwerscheid/MLB/blob/264abcf35bfbedb229b6e5ac6c6236e5b748101a/analysis/countloc_preproc.Rmd" target="_blank">264abcf</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-02-20
+</td>
+<td>
+wflow_publish(“analysis/countloc_preproc.Rmd”)
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div id="scrape-data" class="section level2">
+<h2>Scrape data</h2>
+<p>I used the <code>baseballr</code> package to scrape Statcast data from seasons 2017-2019. Since Statcast will only return a few days’ worth of data at a time, a loop is required. For example, I scraped the 2017 data as follows:</p>
+<pre class="r"><code># Not run:
+season_begin &lt;- as.Date(&quot;2017-04-02&quot;)
+season_end &lt;- as.Date(&quot;2017-11-01&quot;)
+
+dat &lt;- tibble()
+start_date &lt;- season_begin
+while (start_date &lt;= season_end) {
+  cat(&quot;Start Date:&quot;, format(start_date, &quot;%m-%d-%y&quot;), &quot;\n&quot;)
+  dat &lt;- dat %&gt;%
+    bind_rows(baseballr::scrape_statcast_savant_batter_all(start_date = start_date,
+                                                           end_date = start_date + 6))
+  start_date &lt;- start_date + 7
+}
+saveRDS(dat, &quot;data/mlb2017data.rds&quot;)</code></pre>
+</div>
+<div id="remove-pitchers-who-hit-and-hitters-who-pitch" class="section level2">
+<h2>Remove pitchers who hit and hitters who pitch</h2>
+<p>Since I want to capture average position players’ behavior when facing average pitchers, I remove plate appearances where a pitcher is at the plate or where a position player is called in to pitch. I make specific exceptions for two-way players Shohei Ohtani and Michael Lorenzen.</p>
+<pre class="r"><code>suppressMessages(library(tidyverse))
+
+mlb &lt;- readRDS(&quot;data/mlb2019data.rds&quot;) %&gt;%
+  bind_rows(readRDS(&quot;data/mlb2018data.rds&quot;)) %&gt;%
+  bind_rows(readRDS(&quot;data/mlb2017data.rds&quot;))
+
+pitchers &lt;- mlb %&gt;%
+  group_by(pitcher) %&gt;%
+  summarize(n = n())
+batters &lt;- mlb %&gt;%
+  group_by(batter) %&gt;%
+  summarize(n = n())
+
+# A player is defined as a pitcher if they throw more pitches than they face.
+pitchers &lt;- pitchers %&gt;%
+  left_join(batters, by = c(&quot;pitcher&quot; = &quot;batter&quot;), suffix = c(&quot;_thrown&quot;, &quot;_faced&quot;)) %&gt;%
+  filter(is.na(n_faced) | n_faced &lt; n_thrown) %&gt;% 
+  pull(pitcher)
+
+two_way &lt;- unique(mlb$batter[mlb$player_name %in% c(&quot;Shohei Ohtani&quot;, &quot;Michael Lorenzen&quot;)])
+  
+mlb &lt;- mlb %&gt;%
+  filter(pitcher %in% pitchers, 
+         batter %in% two_way | !(batter %in% pitchers))</code></pre>
+</div>
+<div id="remove-doubleheaders" class="section level2">
+<h2>Remove doubleheaders</h2>
+<p>To get count-specific wOBA values, I need to be able to determine the outcome of each plate appearance (PA). One problem with the Statcast data is that there’s not a unique PA ID, and there’s not a straightforward way to assign one. The best solution I came up with was to group by game date, home team, and at-bat number, but this method is unable to distinguish between games played in a doubleheader. I thought about additionally grouping by batter and pitcher, but PAs in which a pitching change occurred mid-at-bat would pose problems, and there is a small chance that the same batter will face the same pitcher in the same at-bat number in subsequent games of a doubleheader. Thus I elected to remove doubleheaders from the data.</p>
+<pre class="r"><code>prev_nrow &lt;- nrow(mlb)
+
+PA_df &lt;- mlb %&gt;%
+  group_by(game_date, home_team, at_bat_number) %&gt;%
+  summarize(is_doubleheader = (sum(balls == 0 &amp; strikes == 0) == 2)) %&gt;%
+  ungroup() %&gt;%
+  mutate(PA_ID = row_number())
+
+all_pitches &lt;- mlb %&gt;%
+  left_join(PA_df, by = c(&quot;game_date&quot;, &quot;home_team&quot;, &quot;at_bat_number&quot;)) %&gt;%
+  filter(!is_doubleheader)
+
+# Calculate the wOBA values for each PA outcome.
+all_pitches &lt;- all_pitches %&gt;%
+  mutate_at(vars(woba_value, woba_denom), ~ replace_na(., 0))
+PA_woba &lt;- all_pitches %&gt;%
+  group_by(PA_ID) %&gt;%
+  summarize(pa_woba_denom = max(woba_denom), pa_woba_value = max(woba_value)) %&gt;%
+  ungroup()
+all_pitches &lt;- all_pitches %&gt;%
+  left_join(PA_woba, by = &quot;PA_ID&quot;)
+
+# What percentage of pitches have I removed?
+paste0(round(100 * (prev_nrow - nrow(all_pitches)) / prev_nrow, 1), 
+       &quot;% of pitches removed&quot;)</code></pre>
+<pre><code>#&gt; [1] &quot;2.4% of pitches removed&quot;</code></pre>
+</div>
+<div id="remove-rare-events" class="section level2">
+<h2>Remove rare events</h2>
+<p>I remove pitchouts, HBPs, and batter and catcher interference. There are also a small number of PAs where the count reaches four balls. I don’t know whether these are errors in data entry or whether the umpires lost track of the count.</p>
+<pre class="r"><code>prev_nrow &lt;- nrow(all_pitches)
+
+all_pitches &lt;- all_pitches %&gt;%
+  filter(balls &lt; 4, !(description == &quot;pitchout&quot;)) %&gt;%
+  filter(!(events %in% c(&quot;hit_by_pitch&quot;, &quot;batter_interference&quot;, &quot;catcher_interf&quot;)))
+
+paste0(round(100 * (prev_nrow - nrow(all_pitches)) / prev_nrow, 1), 
+       &quot;% of pitches removed&quot;)</code></pre>
+<pre><code>#&gt; [1] &quot;0.3% of pitches removed&quot;</code></pre>
+</div>
+<div id="remove-missing-data" class="section level2">
+<h2>Remove missing data</h2>
+<p>I need to remove pitches where pitch location data is missing. The event frequencies (ball, blocked ball, called strike, etc.) are very similar between pitches that include this data and those that don’t, so I think it’s safe to assume that this data is missing at random.</p>
+<pre class="r"><code>prev_nrow &lt;- nrow(all_pitches)
+
+all_pitches &lt;- all_pitches %&gt;%
+  filter(!is.na(plate_x) &amp; !is.na(plate_z))
+
+paste0(round(100 * (prev_nrow - nrow(all_pitches)) / prev_nrow, 1), 
+       &quot;% of pitches removed&quot;)</code></pre>
+<pre><code>#&gt; [1] &quot;0.4% of pitches removed&quot;</code></pre>
+</div>
+<div id="bin-location-data" class="section level2">
+<h2>Bin location data</h2>
+<p>This final step is the most sensitive part of the preprocessing. I’d like to bin the pitch locations to get nonparametric estimates of swing rates and contact rates. I want to use as fine a grid as possible while retaining enough data points per bin to get reasonably accurate estimates. After some fiddling, I settled on bins with widths and heights of 0.2 feet (2.4 inches). I discarded pitches that landed in very sparsely populated bins: these are pitches that are located far off the plate and are easy to lay off of, so they don’t tell us much about plate discipline. Nor do they tell us much about contact rates: it’s not unreasonable to imagine that a batter who swings at one of these pitches sees a crushable softball pitch, so that the sample of pitches that are swung at is especially unrepresentative of all pitches to that location. I’ll have more to say about this step when I discuss metrics for hitter contact.</p>
+<p>In the plot below, the dashed lines indicate the average strike zone. The green bins are the ones that I’ve retained.</p>
+<pre class="r"><code>prev_nrow &lt;- nrow(all_pitches)
+
+all_pitches &lt;- all_pitches %&gt;%
+  mutate(plate_x = round(plate_x / 2, 1) * 2,
+         plate_z = round(plate_z / 2, 1) * 2)
+
+sz_bot &lt;- mean(all_pitches$sz_bot)
+sz_top &lt;- mean(all_pitches$sz_top)
+sz_left &lt;- -8.5 / 12
+sz_right &lt;- 8.5 / 12
+
+ggplot(all_pitches %&gt;% 
+         group_by(plate_x, plate_z, stand) %&gt;% 
+         summarize(n = n()) %&gt;%
+         group_by(plate_x, plate_z) %&gt;%
+         summarize(is.kept = min(n) &gt;= 1000, n = sum(n)), 
+       aes(plate_x, plate_z, fill = is.kept, alpha = n)) +
+  geom_tile() + 
+  xlim(c(-5, 5)) +
+  ylim(c(-3, 7)) +
+  theme_minimal() +
+  guides(fill = FALSE, alpha = FALSE) +
+  scale_fill_manual(values = c(&quot;grey&quot;, &quot;dark green&quot;)) +
+  geom_rect(aes(xmin = sz_left, xmax = sz_right, ymin = sz_bot, ymax = sz_top),
+                col = &quot;black&quot;, linetype = &quot;dashed&quot;, alpha = 0) +
+  geom_segment(aes(x = sz_left, xend = sz_right, y = 0, yend = 0))</code></pre>
+<pre><code>#&gt; Warning: Removed 79 rows containing missing values (geom_tile).</code></pre>
+<p><img src="figure/countloc_preproc.Rmd/loc-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>  
+all_pitches &lt;- all_pitches %&gt;%
+  group_by(plate_x, plate_z, stand) %&gt;%
+  filter(length(plate_x) &gt;= 1000) %&gt;%
+  ungroup()
+
+paste0(round(100 * (prev_nrow - nrow(all_pitches)) / prev_nrow, 1), 
+       &quot;% of pitches removed&quot;)</code></pre>
+<pre><code>#&gt; [1] &quot;12.6% of pitches removed&quot;</code></pre>
+</div>
+<div id="refactor-variables" class="section level2">
+<h2>Refactor variables</h2>
+<p>Finally, I refactor some variables, remove others, and save the results to file.</p>
+<pre class="r"><code># Not run:
+all_pitches &lt;- all_pitches %&gt;%
+  mutate(swing = 1L - (description %in% c(&quot;ball&quot;, &quot;blocked_ball&quot;, &quot;called_strike&quot;)),
+         contact = 1L * (description == &quot;foul&quot; | str_starts(description, &quot;hit_into_play&quot;)),
+         foul = 1L * (description %in% c(&quot;foul&quot;, &quot;foul_pitchout&quot;)),
+         called_strike = 1L * (description == &quot;called_strike&quot;)) %&gt;%
+  select(PA_ID, pa_woba_value, pa_woba_denom, game_year, player_name, stand, balls, strikes, 
+         plate_x, plate_z, swing, contact, foul, called_strike, woba_value, woba_denom)
+
+saveRDS(all_pitches, &quot;output/mlb_preproc.rds&quot;)</code></pre>
+<br> <br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>#&gt; R version 3.5.3 (2019-03-11)
+#&gt; Platform: x86_64-apple-darwin15.6.0 (64-bit)
+#&gt; Running under: macOS Mojave 10.14.6
+#&gt; 
+#&gt; Matrix products: default
+#&gt; BLAS: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRblas.0.dylib
+#&gt; LAPACK: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRlapack.dylib
+#&gt; 
+#&gt; locale:
+#&gt; [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+#&gt; 
+#&gt; attached base packages:
+#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     
+#&gt; 
+#&gt; other attached packages:
+#&gt; [1] forcats_0.4.0   stringr_1.4.0   dplyr_0.8.0.1   purrr_0.3.2    
+#&gt; [5] readr_1.3.1     tidyr_0.8.3     tibble_2.1.1    ggplot2_3.2.0  
+#&gt; [9] tidyverse_1.2.1
+#&gt; 
+#&gt; loaded via a namespace (and not attached):
+#&gt;  [1] Rcpp_1.0.1       cellranger_1.1.0 pillar_1.3.1     compiler_3.5.3  
+#&gt;  [5] git2r_0.25.2     workflowr_1.2.0  tools_3.5.3      digest_0.6.18   
+#&gt;  [9] lubridate_1.7.4  jsonlite_1.6     evaluate_0.13    nlme_3.1-137    
+#&gt; [13] gtable_0.3.0     lattice_0.20-38  pkgconfig_2.0.2  rlang_0.4.2     
+#&gt; [17] cli_1.1.0        rstudioapi_0.10  yaml_2.2.0       haven_2.1.1     
+#&gt; [21] xfun_0.6         withr_2.1.2      xml2_1.2.0       httr_1.4.0      
+#&gt; [25] knitr_1.22       hms_0.4.2        generics_0.0.2   fs_1.2.7        
+#&gt; [29] rprojroot_1.3-2  grid_3.5.3       tidyselect_0.2.5 glue_1.3.1      
+#&gt; [33] R6_2.4.0         readxl_1.3.1     rmarkdown_1.12   modelr_0.1.5    
+#&gt; [37] magrittr_1.5     whisker_0.3-2    backports_1.1.3  scales_1.0.0    
+#&gt; [41] htmltools_0.3.6  rvest_0.3.4      assertthat_0.2.1 colorspace_1.4-1
+#&gt; [45] labeling_0.3     stringi_1.4.3    lazyeval_0.2.2   munsell_0.5.0   
+#&gt; [49] broom_0.5.1      crayon_1.3.4</code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
