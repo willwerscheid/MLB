@@ -517,10 +517,10 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtree264abcf35bfbedb229b6e5ac6c6236e5b748101atargetblank264abcfa"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/MLB/tree/264abcf35bfbedb229b6e5ac6c6236e5b748101a" target="_blank">264abcf</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtreea683edee4d92e6f81fc3fb74e7619753efcffec2targetblanka683edea"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/MLB/tree/a683edee4d92e6f81fc3fb74e7619753efcffec2" target="_blank">a683ede</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtree264abcf35bfbedb229b6e5ac6c6236e5b748101atargetblank264abcfa" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtreea683edee4d92e6f81fc3fb74e7619753efcffec2targetblanka683edea" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -536,6 +536,7 @@ Ignored files:
 
 Untracked files:
     Untracked:  .DS_Store
+    Untracked:  analysis/countloc_woba.Rmd
     Untracked:  code/BBrates.R
     Untracked:  code/park_factors.R
     Untracked:  code/xBB.R
@@ -598,6 +599,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/willwerscheid/MLB/blob/a683edee4d92e6f81fc3fb74e7619753efcffec2/analysis/countloc_preproc.Rmd" target="_blank">a683ede</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-02-20
+</td>
+<td>
+wflow_publish(“analysis/countloc_preproc.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/MLB/dee85479550d05cff65de874b74dfc962e1a3038/docs/countloc_preproc.html" target="_blank">dee8547</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-02-20
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -755,6 +790,43 @@ ggplot(all_pitches %&gt;%
   geom_segment(aes(x = sz_left, xend = sz_right, y = 0, yend = 0))</code></pre>
 <pre><code>#&gt; Warning: Removed 79 rows containing missing values (geom_tile).</code></pre>
 <p><img src="figure/countloc_preproc.Rmd/loc-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-loc-1">
+Past versions of loc-1.png
+</button>
+</p>
+<div id="fig-loc-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/willwerscheid/MLB/blob/dee85479550d05cff65de874b74dfc962e1a3038/docs/figure/countloc_preproc.Rmd/loc-1.png" target="_blank">dee8547</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-02-20
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>  
 all_pitches &lt;- all_pitches %&gt;%
   group_by(plate_x, plate_z, stand) %&gt;%
@@ -768,8 +840,7 @@ paste0(round(100 * (prev_nrow - nrow(all_pitches)) / prev_nrow, 1),
 <div id="refactor-variables" class="section level2">
 <h2>Refactor variables</h2>
 <p>Finally, I refactor some variables, remove others, and save the results to file.</p>
-<pre class="r"><code># Not run:
-all_pitches &lt;- all_pitches %&gt;%
+<pre class="r"><code>all_pitches &lt;- all_pitches %&gt;%
   mutate(swing = 1L - (description %in% c(&quot;ball&quot;, &quot;blocked_ball&quot;, &quot;called_strike&quot;)),
          contact = 1L * (description == &quot;foul&quot; | str_starts(description, &quot;hit_into_play&quot;)),
          foul = 1L * (description %in% c(&quot;foul&quot;, &quot;foul_pitchout&quot;)),
