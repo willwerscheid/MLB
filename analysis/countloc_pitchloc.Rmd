@@ -1,0 +1,66 @@
+---
+title: "Swing and called strike probabilities"
+author: "Jason Willwerscheid"
+date: "2/20/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, comment = "#>")
+```
+
+## Strike probabilities
+
+To calculate the value of swinging at a pitch, I need to know whether pitches that are swung at would have been called strikes if they weren't swung on. It's not as simple as looking at whether or not a pitch is in the strike zone: pitches at the corners are much less likely to be called strikes than pitches over the middle of the plate. Thus I assign to each pitch a probability that it will be called a strike, conditional on its location. I use empirical proportions, and I compare results with the [theoretical strike zone](https://www.baseballprospectus.com/news/article/37347/robo-strike-zone-not-simple-think/).
+
+```{r looks}
+suppressMessages(library(tidyverse))
+
+all_pitches <- readRDS("output/mlb_preproc.rds")
+
+plate_left <- -8.5 / 12
+plate_right <- 8.5 / 12
+sz_left <- plate_left - 2.94 / 2 / 12
+sz_right <- plate_right + 2.94 / 2 / 12
+sz_bot <- 15.53 / 12
+sz_top <- 42.47 / 12
+
+looks <- all_pitches %>%
+  filter(swing == 0) %>%
+  group_by(plate_x, plate_z) %>%
+  summarize(p_strike = sum(called_strike) / sum(swing == 0)) %>%
+  ungroup()
+
+ggplot(looks, aes(x = plate_x, y = plate_z, fill = p_strike)) + 
+  geom_tile() +
+  scale_fill_gradient(low = "white", high = "blue") +
+  geom_rect(aes(xmin = sz_left, xmax = sz_right, ymin = sz_bot, ymax = sz_top),
+                col = "black", linetype = "dashed", alpha = 0) +
+  geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0))
+```
+
+## Contact probabilities
+
+I'd also like to condition the probability of a batter making contact on the pitch location. I make allowances for differences in left- and right-handed players.
+
+```{r swings}
+swings <- all_pitches %>%
+  group_by(plate_x, plate_z, stand) %>%
+  summarize(n = sum(swing == 1), 
+            p_contact = ifelse(sum(swing == 1) == 0, 0, 
+                               sum(contact == 1) / sum(swing == 1))) %>%
+  ungroup() 
+
+ggplot(swings, aes(x = plate_x, y = plate_z, fill = p_contact)) + 
+  geom_tile() +
+  scale_fill_gradient(low = "white", high = "blue") +
+  facet_wrap(~stand) +
+  geom_rect(aes(xmin = sz_left, xmax = sz_right, ymin = sz_bot, ymax = sz_top),
+                col = "black", linetype = "dashed", alpha = 0) +
+  geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0))
+```
+
+```{r save_res}
+saveRDS(looks, "pitchloc_looks.rds")
+saveRDS(swings, "pitchloc_swings.rds")
+```
