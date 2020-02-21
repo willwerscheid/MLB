@@ -517,10 +517,10 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtreea683edee4d92e6f81fc3fb74e7619753efcffec2targetblanka683edea"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/MLB/tree/a683edee4d92e6f81fc3fb74e7619753efcffec2" target="_blank">a683ede</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtree403035ce192e3e5b9f390f3009be4622bf6dc32ctargetblank403035ca"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/MLB/tree/403035ce192e3e5b9f390f3009be4622bf6dc32c" target="_blank">403035c</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtreea683edee4d92e6f81fc3fb74e7619753efcffec2targetblanka683edea" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtree403035ce192e3e5b9f390f3009be4622bf6dc32ctargetblank403035ca" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -536,7 +536,6 @@ Ignored files:
 
 Untracked files:
     Untracked:  .DS_Store
-    Untracked:  analysis/countloc_woba.Rmd
     Untracked:  code/BBrates.R
     Untracked:  code/park_factors.R
     Untracked:  code/xBB.R
@@ -557,7 +556,10 @@ Untracked files:
     Untracked:  data/standard2018NP.csv
     Untracked:  data/standard2019.csv
     Untracked:  data/standard2019NP.csv
+    Untracked:  output/count_woba.rds
     Untracked:  output/mlb_preproc.rds
+    Untracked:  pitchloc_looks.rds
+    Untracked:  pitchloc_swings.rds
 
 Unstaged changes:
     Modified:   .gitignore
@@ -599,6 +601,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/willwerscheid/MLB/blob/403035ce192e3e5b9f390f3009be4622bf6dc32c/analysis/countloc_preproc.Rmd" target="_blank">403035c</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-02-20
+</td>
+<td>
+wflow_publish(“analysis/countloc_preproc.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/MLB/5eb5f07ff5df670faccf40e3e110d158c070a834/docs/countloc_preproc.html" target="_blank">5eb5f07</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-02-20
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -718,7 +754,7 @@ all_pitches &lt;- mlb %&gt;%
   left_join(PA_df, by = c(&quot;game_date&quot;, &quot;home_team&quot;, &quot;at_bat_number&quot;)) %&gt;%
   filter(!is_doubleheader)
 
-# Calculate the wOBA values for each PA outcome.
+# Get the wOBA values for each PA outcome.
 all_pitches &lt;- all_pitches %&gt;%
   mutate_at(vars(woba_value, woba_denom), ~ replace_na(., 0))
 PA_woba &lt;- all_pitches %&gt;%
@@ -758,27 +794,32 @@ paste0(round(100 * (prev_nrow - nrow(all_pitches)) / prev_nrow, 1),
        &quot;% of pitches removed&quot;)</code></pre>
 <pre><code>#&gt; [1] &quot;0.4% of pitches removed&quot;</code></pre>
 </div>
+<div id="flip-location-data-for-left-handed-hitters" class="section level2">
+<h2>Flip location data for left-handed hitters</h2>
+<p>Since right-handed hitters’ preferred pitch zones are mirror images of left-handed hitters’, I flip the <span class="math inline">\(x\)</span>-axis for pitches to lefties. This transformation eliminates the need to condition on handedness in subsequent computations.</p>
+<pre class="r"><code>all_pitches &lt;- all_pitches %&gt;%
+  mutate(plate_x = ifelse(stand == &quot;L&quot;, -plate_x, plate_x))</code></pre>
+</div>
 <div id="bin-location-data" class="section level2">
 <h2>Bin location data</h2>
-<p>This final step is the most sensitive part of the preprocessing. I’d like to bin the pitch locations to get nonparametric estimates of swing rates and contact rates. I want to use as fine a grid as possible while retaining enough data points per bin to get reasonably accurate estimates. After some fiddling, I settled on bins with widths and heights of 0.2 feet (2.4 inches). I discarded pitches that landed in very sparsely populated bins: these are pitches that are located far off the plate and are easy to lay off of, so they don’t tell us much about plate discipline. Nor do they tell us much about contact rates: it’s not unreasonable to imagine that a batter who swings at one of these pitches sees a crushable softball pitch, so that the sample of pitches that are swung at is especially unrepresentative of all pitches to that location. I’ll have more to say about this step when I discuss metrics for hitter contact.</p>
-<p>In the plot below, the dashed lines indicate the average strike zone. The green bins are the ones that I’ve retained.</p>
+<p>This final step is the most sensitive part of the preprocessing. I’d like to bin the pitch locations to get nonparametric estimates of swing rates and contact rates. I want to use as fine a grid as possible while retaining enough data points per bin to get reasonably accurate estimates. After some fiddling, I settled on bins with widths and heights of 0.2 feet (2.4 inches). I discarded pitches that landed in very sparsely populated bins: these are pitches that are located far off the plate and are easy to lay off of, so they don’t tell us much about plate discipline. I’ll have more to say about this step when I discuss metrics for hitter contact.</p>
+<p>In the plot below, the dashed lines indicate the <a href="https://www.baseballprospectus.com/news/article/37347/robo-strike-zone-not-simple-think/">theoretical strike zone</a>. The green bins are the ones that I’ve retained.</p>
 <pre class="r"><code>prev_nrow &lt;- nrow(all_pitches)
 
 all_pitches &lt;- all_pitches %&gt;%
   mutate(plate_x = round(plate_x / 2, 1) * 2,
-         plate_z = round(plate_z / 2, 1) * 2)
+         plate_z = round(plate_z / 2, 1) * 2) %&gt;%
+  group_by(plate_x, plate_z)
 
-sz_bot &lt;- mean(all_pitches$sz_bot)
-sz_top &lt;- mean(all_pitches$sz_top)
-sz_left &lt;- -8.5 / 12
-sz_right &lt;- 8.5 / 12
+plate_left &lt;- -8.5 / 12
+plate_right &lt;- 8.5 / 12
+sz_left &lt;- plate_left - 2.94 / 2 / 12
+sz_right &lt;- plate_right + 2.94 / 2 / 12
+sz_bot &lt;- 15.53 / 12
+sz_top &lt;- 42.47 / 12
 
-ggplot(all_pitches %&gt;% 
-         group_by(plate_x, plate_z, stand) %&gt;% 
-         summarize(n = n()) %&gt;%
-         group_by(plate_x, plate_z) %&gt;%
-         summarize(is.kept = min(n) &gt;= 1000, n = sum(n)), 
-       aes(plate_x, plate_z, fill = is.kept, alpha = n)) +
+ggplot(all_pitches %&gt;% summarize(n = n()), 
+       aes(plate_x, plate_z, fill = n &gt;= 1000, alpha = n)) +
   geom_tile() + 
   xlim(c(-5, 5)) +
   ylim(c(-3, 7)) +
@@ -787,7 +828,7 @@ ggplot(all_pitches %&gt;%
   scale_fill_manual(values = c(&quot;grey&quot;, &quot;dark green&quot;)) +
   geom_rect(aes(xmin = sz_left, xmax = sz_right, ymin = sz_bot, ymax = sz_top),
                 col = &quot;black&quot;, linetype = &quot;dashed&quot;, alpha = 0) +
-  geom_segment(aes(x = sz_left, xend = sz_right, y = 0, yend = 0))</code></pre>
+  geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0))</code></pre>
 <pre><code>#&gt; Warning: Removed 79 rows containing missing values (geom_tile).</code></pre>
 <p><img src="figure/countloc_preproc.Rmd/loc-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
@@ -829,13 +870,12 @@ Jason Willwerscheid
 </div>
 <pre class="r"><code>  
 all_pitches &lt;- all_pitches %&gt;%
-  group_by(plate_x, plate_z, stand) %&gt;%
   filter(length(plate_x) &gt;= 1000) %&gt;%
   ungroup()
 
 paste0(round(100 * (prev_nrow - nrow(all_pitches)) / prev_nrow, 1), 
        &quot;% of pitches removed&quot;)</code></pre>
-<pre><code>#&gt; [1] &quot;12.6% of pitches removed&quot;</code></pre>
+<pre><code>#&gt; [1] &quot;6.7% of pitches removed&quot;</code></pre>
 </div>
 <div id="refactor-variables" class="section level2">
 <h2>Refactor variables</h2>
