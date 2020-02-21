@@ -12,7 +12,7 @@
 <meta name="author" content="Jason Willwerscheid" />
 
 
-<title>Swing, called strike, and contact probabilities</title>
+<title>Swing, called strike, contact, and foul probabilities</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -411,7 +411,7 @@ div.section {
 
 
 
-<h1 class="title toc-ignore">Swing, called strike, and contact probabilities</h1>
+<h1 class="title toc-ignore">Swing, called strike, contact, and foul probabilities</h1>
 <h4 class="author">Jason Willwerscheid</h4>
 <h4 class="date">2/20/2020</h4>
 
@@ -517,10 +517,10 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtree6f42fc81abd97b52651c174171cb5f37a1fa7000targetblank6f42fc8a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/MLB/tree/6f42fc81abd97b52651c174171cb5f37a1fa7000" target="_blank">6f42fc8</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtreede63c464541834b918a53623a3e7ba2b6a2c57c7targetblankde63c46a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/MLB/tree/de63c464541834b918a53623a3e7ba2b6a2c57c7" target="_blank">de63c46</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtree6f42fc81abd97b52651c174171cb5f37a1fa7000targetblank6f42fc8a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtreede63c464541834b918a53623a3e7ba2b6a2c57c7targetblankde63c46a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -558,6 +558,7 @@ Untracked files:
     Untracked:  data/standard2019NP.csv
     Untracked:  output/count_woba.rds
     Untracked:  output/mlb_preproc.rds
+    Untracked:  output/pitchloc_res.rds
 
 Unstaged changes:
     Modified:   .gitignore
@@ -599,6 +600,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/willwerscheid/MLB/blob/de63c464541834b918a53623a3e7ba2b6a2c57c7/analysis/countloc_pitchloc.Rmd" target="_blank">de63c46</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-02-20
+</td>
+<td>
+wflow_publish(“analysis/countloc_pitchloc.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/MLB/419221be88a6e93325b5e713912c9583b7231961/docs/countloc_pitchloc.html" target="_blank">419221b</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-02-20
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -657,7 +692,7 @@ wflow_publish(“analysis/countloc_pitchloc.Rmd”)
 </div>
 </div>
 </div>
-<p>I’ll need three probabilities that condition on pitch location. First, I’ll need the probability that an average batter will swing at a pitch, conditional on the pitch count and the location of the pitch. Second, I’ll need the probability that a pitch will be called a strike, conditional on the pitch location and the batter not swinging. And finally, I’ll need the probability that an average batter will make contact with a pitch, conditional on the pitch location and the batter swinging. I make the simplifying assumption that the latter two probabilities are independent of the pitch count. This is not actually true: umpires are more reluctant to call strike three than strikes one and two, and hitters can afford to be choosier when the count is in their favor. It’d be a good idea to revisit this analysis in the future to see how things change when everything is conditioned on pitch count.</p>
+<p>I’ll need four probabilities that condition on pitch location. First, I’ll need the probability that an average batter will swing at a pitch, conditional on the pitch count and the location of the pitch. Second, I’ll need the probability that a pitch will be called a strike, conditional on the pitch location and the batter not swinging. Third, I’ll need the probability that an average batter will make contact with a pitch, conditional on the pitch location and the batter swinging. And finally, I’ll need the probability that the ball will be hit foul, conditional on the pitch location and the batter making contact. I make the simplifying assumption that the latter three probabilities are independent of the pitch count. This is not actually true: for example, umpires are more reluctant to call strike three than strikes one and two, and hitters can afford to be choosier when the count is in their favor. It’d be a good idea to revisit this analysis in the future to see how things change when everything is conditioned on pitch count.</p>
 <div id="called-strike-probabilities" class="section level2">
 <h2>Called strike probabilities</h2>
 <p>I start by calculating <span class="math display">\[ p(\text{strike} \mid \text{pitch location, no swing}) \]</span> Note that it’s not as simple as looking at whether or not a pitch is located in the strike zone: pitches at the corners are much less likely to be called strikes than pitches over the middle of the plate. Thus I estimate probabilities using empirical proportions. In the plot below, the dashed line indicates the <a href="https://www.baseballprospectus.com/news/article/37347/robo-strike-zone-not-simple-think/">theoretical strike zone</a>.</p>
@@ -709,6 +744,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/willwerscheid/MLB/blob/419221be88a6e93325b5e713912c9583b7231961/docs/figure/countloc_pitchloc.Rmd/looks-1.png" target="_blank">419221b</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-02-20
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/willwerscheid/MLB/blob/65ab6870ac44a615aa87bdefd992847e568360d8/docs/figure/countloc_pitchloc.Rmd/looks-1.png" target="_blank">65ab687</a>
 </td>
 <td>
@@ -740,6 +786,43 @@ ggplot(contact, aes(x = plate_x, y = plate_z, fill = p_contact)) +
                 col = &quot;black&quot;, linetype = &quot;dashed&quot;, alpha = 0) +
   geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0))</code></pre>
 <p><img src="figure/countloc_pitchloc.Rmd/contact-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-contact-1">
+Past versions of contact-1.png
+</button>
+</p>
+<div id="fig-contact-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/willwerscheid/MLB/blob/419221be88a6e93325b5e713912c9583b7231961/docs/figure/countloc_pitchloc.Rmd/contact-1.png" target="_blank">419221b</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-02-20
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>These probabilities are a bit noisy for pitches that are high and outside (some of these bins have as few as 20 to 30 observations). A very small amount of smoothing goes a long way (I essentially force each bin to use at least 100 observations, borrowing observations from nearby bins when necessary):</p>
 <pre class="r"><code># knn smoothing
 smooth_probs &lt;- function(x, y, n, p, k) {
@@ -764,10 +847,66 @@ ggplot(smooth_contact, aes(x = plate_x, y = plate_z, fill = p_contact)) +
                 col = &quot;black&quot;, linetype = &quot;dashed&quot;, alpha = 0) +
   geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0))</code></pre>
 <p><img src="figure/countloc_pitchloc.Rmd/smooth_contact-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-smooth_contact-1">
+Past versions of smooth_contact-1.png
+</button>
+</p>
+<div id="fig-smooth_contact-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/willwerscheid/MLB/blob/419221be88a6e93325b5e713912c9583b7231961/docs/figure/countloc_pitchloc.Rmd/smooth_contact-1.png" target="_blank">419221b</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-02-20
+</td>
+</tr>
+</tbody>
+</table>
 </div>
-<div id="swing-probabilites" class="section level2">
-<h2>Swing probabilites</h2>
-<p>Finally I calculate <span class="math display">\[ p(\text{swing} \mid \text{count, pitch location}) \]</span> I again do a small amount of smoothing. Few plate appearances go to 3-0, so those probabilites appear noisy even after smoothing, but I prefer to leave the estimates as they are: oversmoothing yields estimates that are too high at the margins (and thus systematically biased rather than merely noisy).</p>
+</div>
+</div>
+<div id="foul-probabilities" class="section level2">
+<h2>Foul probabilities</h2>
+<p>Next up is <span class="math display">\[ p(\text{foul} \mid \text{pitch location, contact}) \]</span></p>
+<p>I again do a small amount of smoothing.</p>
+<pre class="r"><code>fouls &lt;- all_pitches %&gt;%
+  filter(contact == 1) %&gt;%
+  group_by(plate_x, plate_z) %&gt;%
+  summarize(n = n(), p_foul = sum(foul) / n()) %&gt;%
+  ungroup() %&gt;%
+  mutate(p_foul = smooth_probs(plate_x, plate_z, n, p_foul, k = 100))
+
+ggplot(fouls, aes(x = plate_x, y = plate_z, fill = p_foul)) + 
+  geom_tile() +
+  scale_fill_gradient(low = &quot;white&quot;, high = &quot;blue&quot;) +
+  geom_rect(aes(xmin = sz_left, xmax = sz_right, ymin = sz_bot, ymax = sz_top),
+                col = &quot;black&quot;, linetype = &quot;dashed&quot;, alpha = 0) +
+  geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0))</code></pre>
+<p><img src="figure/countloc_pitchloc.Rmd/fouls-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="swing-probabilities" class="section level2">
+<h2>Swing probabilities</h2>
+<p>Finally I calculate <span class="math display">\[ p(\text{swing} \mid \text{count, pitch location}) \]</span> Few plate appearances go to 3-0, so those probabilites appear noisy even after smoothing, but I prefer to leave the estimates as they are: oversmoothing yields estimates that are too high at the margins (and thus systematically biased rather than merely noisy).</p>
 <pre class="r"><code>swings &lt;- all_pitches %&gt;%
   group_by(balls, strikes, plate_x, plate_z) %&gt;%
   summarize(n = n(), p_swing = sum(swing) / n()) %&gt;%
@@ -808,6 +947,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/willwerscheid/MLB/blob/419221be88a6e93325b5e713912c9583b7231961/docs/figure/countloc_pitchloc.Rmd/swings-1.png" target="_blank">419221b</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-02-20
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/willwerscheid/MLB/blob/65ab6870ac44a615aa87bdefd992847e568360d8/docs/figure/countloc_pitchloc.Rmd/swings-1.png" target="_blank">65ab687</a>
 </td>
 <td>
@@ -821,7 +971,7 @@ Jason Willwerscheid
 </table>
 </div>
 </div>
-<pre class="r"><code>pitchloc_res &lt;- list(looks = looks, contact = contact, swings = swings)
+<pre class="r"><code>pitchloc_res &lt;- list(looks = looks, contact = contact, fouls = fouls, swings = swings)
 saveRDS(pitchloc_res, &quot;output/pitchloc_res.rds&quot;)</code></pre>
 <br> <br>
 <p>
