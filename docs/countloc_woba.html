@@ -517,10 +517,10 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtree61d8c52b260b89b416f9dfe7ec07224da0d2f242targetblank61d8c52a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/MLB/tree/61d8c52b260b89b416f9dfe7ec07224da0d2f242" target="_blank">61d8c52</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtree14dfd37bf06853a74c44e593cf632bc8e27a87e7targetblank14dfd37a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/MLB/tree/14dfd37bf06853a74c44e593cf632bc8e27a87e7" target="_blank">14dfd37</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtree61d8c52b260b89b416f9dfe7ec07224da0d2f242targetblank61d8c52a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtree14dfd37bf06853a74c44e593cf632bc8e27a87e7targetblank14dfd37a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -530,6 +530,7 @@ Ignored files:
     Ignored:    .RData
     Ignored:    .Rhistory
     Ignored:    .Rproj.user/
+    Ignored:    analysis/figure/
     Ignored:    data/mlb2017data.rds
     Ignored:    data/mlb2018data.rds
     Ignored:    data/mlb2019data.rds
@@ -558,6 +559,7 @@ Untracked files:
     Untracked:  data/standard2019NP.csv
     Untracked:  output/count_woba.rds
     Untracked:  output/mlb_preproc.rds
+    Untracked:  output/pitchloc_res.rds
 
 Unstaged changes:
     Modified:   .gitignore
@@ -599,6 +601,23 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/MLB/693b8c1fc212b94c0deaf200d808b21c3e691add/docs/countloc_woba.html" target="_blank">693b8c1</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-02-20
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -717,11 +736,11 @@ knitr::kable(wobacon, digits = 3)</code></pre>
 </tr>
 <tr class="even">
 <td align="right">2018</td>
-<td align="right">0.385</td>
+<td align="right">0.384</td>
 </tr>
 <tr class="odd">
 <td align="right">2019</td>
-<td align="right">0.404</td>
+<td align="right">0.403</td>
 </tr>
 </tbody>
 </table>
@@ -761,54 +780,54 @@ knitr::kable(count_woba, digits = 3)  </code></pre>
 <td align="right">2017</td>
 <td align="right">0</td>
 <td align="right">0</td>
-<td align="right">0.334</td>
+<td align="right">0.336</td>
 <td align="right">0.001</td>
-<td align="right">0.334</td>
+<td align="right">0.336</td>
 <td align="right">0.000</td>
 </tr>
 <tr class="even">
 <td align="right">2018</td>
 <td align="right">0</td>
 <td align="right">0</td>
-<td align="right">0.324</td>
+<td align="right">0.326</td>
 <td align="right">0.001</td>
-<td align="right">0.325</td>
+<td align="right">0.327</td>
 <td align="right">0.001</td>
 </tr>
 <tr class="odd">
 <td align="right">2019</td>
 <td align="right">0</td>
 <td align="right">0</td>
-<td align="right">0.334</td>
+<td align="right">0.336</td>
 <td align="right">0.001</td>
-<td align="right">0.333</td>
+<td align="right">0.335</td>
 <td align="right">-0.001</td>
 </tr>
 <tr class="even">
 <td align="right">2017</td>
 <td align="right">0</td>
 <td align="right">1</td>
-<td align="right">0.283</td>
+<td align="right">0.285</td>
 <td align="right">0.002</td>
-<td align="right">0.283</td>
+<td align="right">0.285</td>
 <td align="right">0.000</td>
 </tr>
 <tr class="odd">
 <td align="right">2018</td>
 <td align="right">0</td>
 <td align="right">1</td>
-<td align="right">0.276</td>
+<td align="right">0.277</td>
 <td align="right">0.002</td>
-<td align="right">0.275</td>
+<td align="right">0.277</td>
 <td align="right">-0.001</td>
 </tr>
 <tr class="even">
 <td align="right">2019</td>
 <td align="right">0</td>
 <td align="right">1</td>
-<td align="right">0.281</td>
+<td align="right">0.283</td>
 <td align="right">0.002</td>
-<td align="right">0.282</td>
+<td align="right">0.284</td>
 <td align="right">0.001</td>
 </tr>
 <tr class="odd">
@@ -817,7 +836,7 @@ knitr::kable(count_woba, digits = 3)  </code></pre>
 <td align="right">2</td>
 <td align="right">0.209</td>
 <td align="right">0.002</td>
-<td align="right">0.214</td>
+<td align="right">0.213</td>
 <td align="right">0.005</td>
 </tr>
 <tr class="even">
@@ -834,7 +853,7 @@ knitr::kable(count_woba, digits = 3)  </code></pre>
 <td align="right">0</td>
 <td align="right">2</td>
 <td align="right">0.215</td>
-<td align="right">0.003</td>
+<td align="right">0.002</td>
 <td align="right">0.213</td>
 <td align="right">-0.002</td>
 </tr>
@@ -842,243 +861,243 @@ knitr::kable(count_woba, digits = 3)  </code></pre>
 <td align="right">2017</td>
 <td align="right">1</td>
 <td align="right">0</td>
-<td align="right">0.376</td>
+<td align="right">0.379</td>
 <td align="right">0.002</td>
-<td align="right">0.374</td>
+<td align="right">0.377</td>
 <td align="right">-0.002</td>
 </tr>
 <tr class="odd">
 <td align="right">2018</td>
 <td align="right">1</td>
 <td align="right">0</td>
-<td align="right">0.362</td>
-<td align="right">0.002</td>
 <td align="right">0.365</td>
+<td align="right">0.002</td>
+<td align="right">0.369</td>
 <td align="right">0.003</td>
 </tr>
 <tr class="even">
 <td align="right">2019</td>
 <td align="right">1</td>
 <td align="right">0</td>
-<td align="right">0.374</td>
+<td align="right">0.378</td>
 <td align="right">0.002</td>
-<td align="right">0.373</td>
+<td align="right">0.376</td>
 <td align="right">-0.001</td>
 </tr>
 <tr class="odd">
 <td align="right">2017</td>
 <td align="right">1</td>
 <td align="right">1</td>
-<td align="right">0.315</td>
+<td align="right">0.318</td>
 <td align="right">0.002</td>
-<td align="right">0.313</td>
+<td align="right">0.316</td>
 <td align="right">-0.002</td>
 </tr>
 <tr class="even">
 <td align="right">2018</td>
 <td align="right">1</td>
 <td align="right">1</td>
-<td align="right">0.304</td>
+<td align="right">0.307</td>
 <td align="right">0.002</td>
-<td align="right">0.305</td>
+<td align="right">0.307</td>
 <td align="right">0.001</td>
 </tr>
 <tr class="odd">
 <td align="right">2019</td>
 <td align="right">1</td>
 <td align="right">1</td>
-<td align="right">0.311</td>
+<td align="right">0.314</td>
 <td align="right">0.002</td>
-<td align="right">0.312</td>
+<td align="right">0.315</td>
 <td align="right">0.001</td>
 </tr>
 <tr class="even">
 <td align="right">2017</td>
 <td align="right">1</td>
 <td align="right">2</td>
-<td align="right">0.231</td>
+<td align="right">0.233</td>
 <td align="right">0.002</td>
-<td align="right">0.235</td>
+<td align="right">0.237</td>
 <td align="right">0.004</td>
 </tr>
 <tr class="odd">
 <td align="right">2018</td>
 <td align="right">1</td>
 <td align="right">2</td>
-<td align="right">0.230</td>
+<td align="right">0.232</td>
 <td align="right">0.002</td>
-<td align="right">0.227</td>
+<td align="right">0.228</td>
 <td align="right">-0.004</td>
 </tr>
 <tr class="even">
 <td align="right">2019</td>
 <td align="right">1</td>
 <td align="right">2</td>
-<td align="right">0.234</td>
+<td align="right">0.236</td>
 <td align="right">0.002</td>
-<td align="right">0.234</td>
+<td align="right">0.236</td>
 <td align="right">0.000</td>
 </tr>
 <tr class="odd">
 <td align="right">2017</td>
 <td align="right">2</td>
 <td align="right">0</td>
-<td align="right">0.441</td>
+<td align="right">0.445</td>
 <td align="right">0.003</td>
-<td align="right">0.440</td>
-<td align="right">-0.001</td>
+<td align="right">0.444</td>
+<td align="right">0.000</td>
 </tr>
 <tr class="even">
 <td align="right">2018</td>
 <td align="right">2</td>
 <td align="right">0</td>
-<td align="right">0.430</td>
+<td align="right">0.435</td>
 <td align="right">0.003</td>
-<td align="right">0.431</td>
+<td align="right">0.436</td>
 <td align="right">0.001</td>
 </tr>
 <tr class="odd">
 <td align="right">2019</td>
 <td align="right">2</td>
 <td align="right">0</td>
-<td align="right">0.439</td>
-<td align="right">0.004</td>
-<td align="right">0.439</td>
+<td align="right">0.444</td>
+<td align="right">0.003</td>
+<td align="right">0.444</td>
 <td align="right">0.000</td>
 </tr>
 <tr class="even">
 <td align="right">2017</td>
 <td align="right">2</td>
 <td align="right">1</td>
-<td align="right">0.371</td>
+<td align="right">0.375</td>
 <td align="right">0.003</td>
-<td align="right">0.369</td>
+<td align="right">0.373</td>
 <td align="right">-0.002</td>
 </tr>
 <tr class="odd">
 <td align="right">2018</td>
 <td align="right">2</td>
 <td align="right">1</td>
-<td align="right">0.360</td>
+<td align="right">0.365</td>
 <td align="right">0.003</td>
-<td align="right">0.360</td>
+<td align="right">0.365</td>
 <td align="right">0.000</td>
 </tr>
 <tr class="even">
 <td align="right">2019</td>
 <td align="right">2</td>
 <td align="right">1</td>
-<td align="right">0.366</td>
+<td align="right">0.371</td>
 <td align="right">0.003</td>
-<td align="right">0.368</td>
-<td align="right">0.002</td>
+<td align="right">0.373</td>
+<td align="right">0.001</td>
 </tr>
 <tr class="odd">
 <td align="right">2017</td>
 <td align="right">2</td>
 <td align="right">2</td>
-<td align="right">0.279</td>
+<td align="right">0.282</td>
 <td align="right">0.002</td>
-<td align="right">0.281</td>
+<td align="right">0.284</td>
 <td align="right">0.002</td>
 </tr>
 <tr class="even">
 <td align="right">2018</td>
 <td align="right">2</td>
 <td align="right">2</td>
-<td align="right">0.275</td>
+<td align="right">0.278</td>
 <td align="right">0.002</td>
-<td align="right">0.272</td>
+<td align="right">0.276</td>
 <td align="right">-0.003</td>
 </tr>
 <tr class="odd">
 <td align="right">2019</td>
 <td align="right">2</td>
 <td align="right">2</td>
-<td align="right">0.279</td>
+<td align="right">0.283</td>
 <td align="right">0.002</td>
-<td align="right">0.280</td>
+<td align="right">0.284</td>
 <td align="right">0.001</td>
 </tr>
 <tr class="even">
 <td align="right">2017</td>
 <td align="right">3</td>
 <td align="right">0</td>
-<td align="right">0.548</td>
-<td align="right">0.005</td>
 <td align="right">0.553</td>
+<td align="right">0.005</td>
+<td align="right">0.557</td>
 <td align="right">0.004</td>
 </tr>
 <tr class="odd">
 <td align="right">2018</td>
 <td align="right">3</td>
 <td align="right">0</td>
-<td align="right">0.548</td>
+<td align="right">0.553</td>
 <td align="right">0.005</td>
-<td align="right">0.544</td>
+<td align="right">0.549</td>
 <td align="right">-0.004</td>
 </tr>
 <tr class="even">
 <td align="right">2019</td>
 <td align="right">3</td>
 <td align="right">0</td>
-<td align="right">0.552</td>
+<td align="right">0.557</td>
 <td align="right">0.005</td>
-<td align="right">0.552</td>
-<td align="right">-0.001</td>
+<td align="right">0.557</td>
+<td align="right">0.000</td>
 </tr>
 <tr class="odd">
 <td align="right">2017</td>
+<td align="right">3</td>
+<td align="right">1</td>
+<td align="right">0.484</td>
+<td align="right">0.004</td>
+<td align="right">0.486</td>
+<td align="right">0.002</td>
+</tr>
+<tr class="even">
+<td align="right">2018</td>
 <td align="right">3</td>
 <td align="right">1</td>
 <td align="right">0.478</td>
 <td align="right">0.004</td>
-<td align="right">0.480</td>
-<td align="right">0.002</td>
-</tr>
-<tr class="even">
-<td align="right">2018</td>
-<td align="right">3</td>
-<td align="right">1</td>
-<td align="right">0.471</td>
-<td align="right">0.004</td>
-<td align="right">0.471</td>
-<td align="right">0.000</td>
+<td align="right">0.478</td>
+<td align="right">-0.001</td>
 </tr>
 <tr class="odd">
 <td align="right">2019</td>
 <td align="right">3</td>
 <td align="right">1</td>
-<td align="right">0.480</td>
+<td align="right">0.487</td>
 <td align="right">0.004</td>
-<td align="right">0.479</td>
-<td align="right">-0.002</td>
+<td align="right">0.485</td>
+<td align="right">-0.001</td>
 </tr>
 <tr class="even">
 <td align="right">2017</td>
 <td align="right">3</td>
 <td align="right">2</td>
-<td align="right">0.382</td>
+<td align="right">0.391</td>
 <td align="right">0.003</td>
-<td align="right">0.378</td>
+<td align="right">0.386</td>
 <td align="right">-0.004</td>
 </tr>
 <tr class="odd">
 <td align="right">2018</td>
 <td align="right">3</td>
 <td align="right">2</td>
-<td align="right">0.367</td>
+<td align="right">0.377</td>
 <td align="right">0.003</td>
-<td align="right">0.369</td>
+<td align="right">0.378</td>
 <td align="right">0.002</td>
 </tr>
 <tr class="even">
 <td align="right">2019</td>
 <td align="right">3</td>
 <td align="right">2</td>
-<td align="right">0.375</td>
+<td align="right">0.384</td>
 <td align="right">0.003</td>
-<td align="right">0.377</td>
+<td align="right">0.386</td>
 <td align="right">0.002</td>
 </tr>
 </tbody>
@@ -1141,325 +1160,325 @@ knitr::kable(event_vals, digits = 3)</code></pre>
 <td align="right">2017</td>
 <td align="right">0</td>
 <td align="right">0</td>
-<td align="right">0.040</td>
-<td align="right">-0.050</td>
-<td align="right">-0.050</td>
-<td align="right">0.061</td>
-</tr>
-<tr class="even">
-<td align="right">2018</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0.040</td>
-<td align="right">-0.050</td>
-<td align="right">-0.050</td>
+<td align="right">0.041</td>
+<td align="right">-0.051</td>
+<td align="right">-0.051</td>
 <td align="right">0.059</td>
 </tr>
+<tr class="even">
+<td align="right">2018</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0.041</td>
+<td align="right">-0.051</td>
+<td align="right">-0.051</td>
+<td align="right">0.057</td>
+</tr>
 <tr class="odd">
 <td align="right">2019</td>
 <td align="right">0</td>
 <td align="right">0</td>
-<td align="right">0.040</td>
-<td align="right">-0.050</td>
-<td align="right">-0.050</td>
-<td align="right">0.071</td>
+<td align="right">0.041</td>
+<td align="right">-0.051</td>
+<td align="right">-0.051</td>
+<td align="right">0.068</td>
 </tr>
 <tr class="even">
 <td align="right">2017</td>
 <td align="right">0</td>
 <td align="right">1</td>
-<td align="right">0.030</td>
-<td align="right">-0.070</td>
-<td align="right">-0.070</td>
-<td align="right">0.112</td>
-</tr>
-<tr class="odd">
-<td align="right">2018</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0.030</td>
-<td align="right">-0.070</td>
-<td align="right">-0.070</td>
+<td align="right">0.031</td>
+<td align="right">-0.072</td>
+<td align="right">-0.072</td>
 <td align="right">0.110</td>
 </tr>
+<tr class="odd">
+<td align="right">2018</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0.031</td>
+<td align="right">-0.072</td>
+<td align="right">-0.072</td>
+<td align="right">0.108</td>
+</tr>
 <tr class="even">
 <td align="right">2019</td>
 <td align="right">0</td>
 <td align="right">1</td>
-<td align="right">0.030</td>
-<td align="right">-0.070</td>
-<td align="right">-0.070</td>
-<td align="right">0.121</td>
+<td align="right">0.031</td>
+<td align="right">-0.072</td>
+<td align="right">-0.072</td>
+<td align="right">0.119</td>
 </tr>
 <tr class="odd">
 <td align="right">2017</td>
 <td align="right">0</td>
 <td align="right">2</td>
-<td align="right">0.022</td>
-<td align="right">-0.214</td>
+<td align="right">0.023</td>
+<td align="right">-0.213</td>
 <td align="right">0.000</td>
-<td align="right">0.182</td>
+<td align="right">0.181</td>
 </tr>
 <tr class="even">
 <td align="right">2018</td>
 <td align="right">0</td>
 <td align="right">2</td>
-<td align="right">0.022</td>
+<td align="right">0.023</td>
 <td align="right">-0.205</td>
 <td align="right">0.000</td>
-<td align="right">0.180</td>
+<td align="right">0.179</td>
 </tr>
 <tr class="odd">
 <td align="right">2019</td>
 <td align="right">0</td>
 <td align="right">2</td>
-<td align="right">0.022</td>
+<td align="right">0.023</td>
 <td align="right">-0.213</td>
 <td align="right">0.000</td>
-<td align="right">0.191</td>
+<td align="right">0.190</td>
 </tr>
 <tr class="even">
 <td align="right">2017</td>
 <td align="right">1</td>
 <td align="right">0</td>
-<td align="right">0.066</td>
+<td align="right">0.067</td>
 <td align="right">-0.061</td>
 <td align="right">-0.061</td>
+<td align="right">0.018</td>
+</tr>
+<tr class="odd">
+<td align="right">2018</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0.067</td>
+<td align="right">-0.061</td>
+<td align="right">-0.061</td>
+<td align="right">0.016</td>
+</tr>
+<tr class="even">
+<td align="right">2019</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0.067</td>
+<td align="right">-0.061</td>
+<td align="right">-0.061</td>
+<td align="right">0.027</td>
+</tr>
+<tr class="odd">
+<td align="right">2017</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0.058</td>
+<td align="right">-0.079</td>
+<td align="right">-0.079</td>
+<td align="right">0.079</td>
+</tr>
+<tr class="even">
+<td align="right">2018</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0.058</td>
+<td align="right">-0.079</td>
+<td align="right">-0.079</td>
+<td align="right">0.077</td>
+</tr>
+<tr class="odd">
+<td align="right">2019</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0.058</td>
+<td align="right">-0.079</td>
+<td align="right">-0.079</td>
+<td align="right">0.088</td>
+</tr>
+<tr class="even">
+<td align="right">2017</td>
+<td align="right">1</td>
+<td align="right">2</td>
+<td align="right">0.048</td>
+<td align="right">-0.237</td>
+<td align="right">0.000</td>
+<td align="right">0.158</td>
+</tr>
+<tr class="odd">
+<td align="right">2018</td>
+<td align="right">1</td>
+<td align="right">2</td>
+<td align="right">0.048</td>
+<td align="right">-0.228</td>
+<td align="right">0.000</td>
+<td align="right">0.156</td>
+</tr>
+<tr class="even">
+<td align="right">2019</td>
+<td align="right">1</td>
+<td align="right">2</td>
+<td align="right">0.048</td>
+<td align="right">-0.236</td>
+<td align="right">0.000</td>
+<td align="right">0.167</td>
+</tr>
+<tr class="odd">
+<td align="right">2017</td>
+<td align="right">2</td>
+<td align="right">0</td>
+<td align="right">0.113</td>
+<td align="right">-0.071</td>
+<td align="right">-0.071</td>
+<td align="right">-0.050</td>
+</tr>
+<tr class="even">
+<td align="right">2018</td>
+<td align="right">2</td>
+<td align="right">0</td>
+<td align="right">0.113</td>
+<td align="right">-0.071</td>
+<td align="right">-0.071</td>
+<td align="right">-0.052</td>
+</tr>
+<tr class="odd">
+<td align="right">2019</td>
+<td align="right">2</td>
+<td align="right">0</td>
+<td align="right">0.113</td>
+<td align="right">-0.071</td>
+<td align="right">-0.071</td>
+<td align="right">-0.041</td>
+</tr>
+<tr class="even">
+<td align="right">2017</td>
+<td align="right">2</td>
+<td align="right">1</td>
+<td align="right">0.112</td>
+<td align="right">-0.089</td>
+<td align="right">-0.089</td>
 <td align="right">0.021</td>
 </tr>
 <tr class="odd">
 <td align="right">2018</td>
+<td align="right">2</td>
 <td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0.066</td>
-<td align="right">-0.061</td>
-<td align="right">-0.061</td>
+<td align="right">0.112</td>
+<td align="right">-0.089</td>
+<td align="right">-0.089</td>
 <td align="right">0.019</td>
 </tr>
 <tr class="even">
 <td align="right">2019</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0.066</td>
-<td align="right">-0.061</td>
-<td align="right">-0.061</td>
-<td align="right">0.031</td>
-</tr>
-<tr class="odd">
-<td align="right">2017</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0.055</td>
-<td align="right">-0.078</td>
-<td align="right">-0.078</td>
-<td align="right">0.082</td>
-</tr>
-<tr class="even">
-<td align="right">2018</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0.055</td>
-<td align="right">-0.078</td>
-<td align="right">-0.078</td>
-<td align="right">0.080</td>
-</tr>
-<tr class="odd">
-<td align="right">2019</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0.055</td>
-<td align="right">-0.078</td>
-<td align="right">-0.078</td>
-<td align="right">0.091</td>
-</tr>
-<tr class="even">
-<td align="right">2017</td>
-<td align="right">1</td>
 <td align="right">2</td>
-<td align="right">0.046</td>
-<td align="right">-0.235</td>
+<td align="right">1</td>
+<td align="right">0.112</td>
+<td align="right">-0.089</td>
+<td align="right">-0.089</td>
+<td align="right">0.030</td>
+</tr>
+<tr class="odd">
+<td align="right">2017</td>
+<td align="right">2</td>
+<td align="right">2</td>
+<td align="right">0.102</td>
+<td align="right">-0.284</td>
 <td align="right">0.000</td>
-<td align="right">0.160</td>
-</tr>
-<tr class="odd">
-<td align="right">2018</td>
-<td align="right">1</td>
-<td align="right">2</td>
-<td align="right">0.046</td>
-<td align="right">-0.227</td>
-<td align="right">0.000</td>
-<td align="right">0.158</td>
-</tr>
-<tr class="even">
-<td align="right">2019</td>
-<td align="right">1</td>
-<td align="right">2</td>
-<td align="right">0.046</td>
-<td align="right">-0.234</td>
-<td align="right">0.000</td>
-<td align="right">0.169</td>
-</tr>
-<tr class="odd">
-<td align="right">2017</td>
-<td align="right">2</td>
-<td align="right">0</td>
-<td align="right">0.113</td>
-<td align="right">-0.071</td>
-<td align="right">-0.071</td>
-<td align="right">-0.045</td>
-</tr>
-<tr class="even">
-<td align="right">2018</td>
-<td align="right">2</td>
-<td align="right">0</td>
-<td align="right">0.113</td>
-<td align="right">-0.071</td>
-<td align="right">-0.071</td>
-<td align="right">-0.047</td>
-</tr>
-<tr class="odd">
-<td align="right">2019</td>
-<td align="right">2</td>
-<td align="right">0</td>
-<td align="right">0.113</td>
-<td align="right">-0.071</td>
-<td align="right">-0.071</td>
-<td align="right">-0.035</td>
-</tr>
-<tr class="even">
-<td align="right">2017</td>
-<td align="right">2</td>
-<td align="right">1</td>
 <td align="right">0.111</td>
-<td align="right">-0.088</td>
-<td align="right">-0.088</td>
-<td align="right">0.027</td>
-</tr>
-<tr class="odd">
-<td align="right">2018</td>
-<td align="right">2</td>
-<td align="right">1</td>
-<td align="right">0.111</td>
-<td align="right">-0.088</td>
-<td align="right">-0.088</td>
-<td align="right">0.025</td>
-</tr>
-<tr class="even">
-<td align="right">2019</td>
-<td align="right">2</td>
-<td align="right">1</td>
-<td align="right">0.111</td>
-<td align="right">-0.088</td>
-<td align="right">-0.088</td>
-<td align="right">0.036</td>
-</tr>
-<tr class="odd">
-<td align="right">2017</td>
-<td align="right">2</td>
-<td align="right">2</td>
-<td align="right">0.097</td>
-<td align="right">-0.281</td>
-<td align="right">0.000</td>
-<td align="right">0.114</td>
 </tr>
 <tr class="even">
 <td align="right">2018</td>
 <td align="right">2</td>
 <td align="right">2</td>
-<td align="right">0.097</td>
-<td align="right">-0.272</td>
+<td align="right">0.102</td>
+<td align="right">-0.276</td>
 <td align="right">0.000</td>
-<td align="right">0.113</td>
+<td align="right">0.109</td>
 </tr>
 <tr class="odd">
 <td align="right">2019</td>
 <td align="right">2</td>
 <td align="right">2</td>
-<td align="right">0.097</td>
-<td align="right">-0.280</td>
+<td align="right">0.102</td>
+<td align="right">-0.284</td>
 <td align="right">0.000</td>
-<td align="right">0.124</td>
+<td align="right">0.120</td>
 </tr>
 <tr class="even">
 <td align="right">2017</td>
 <td align="right">3</td>
 <td align="right">0</td>
-<td align="right">0.447</td>
-<td align="right">-0.073</td>
-<td align="right">-0.073</td>
-<td align="right">-0.157</td>
+<td align="right">0.443</td>
+<td align="right">-0.071</td>
+<td align="right">-0.071</td>
+<td align="right">-0.163</td>
 </tr>
 <tr class="odd">
 <td align="right">2018</td>
 <td align="right">3</td>
 <td align="right">0</td>
-<td align="right">0.456</td>
-<td align="right">-0.073</td>
-<td align="right">-0.073</td>
-<td align="right">-0.159</td>
+<td align="right">0.451</td>
+<td align="right">-0.071</td>
+<td align="right">-0.071</td>
+<td align="right">-0.165</td>
 </tr>
 <tr class="even">
 <td align="right">2019</td>
 <td align="right">3</td>
 <td align="right">0</td>
-<td align="right">0.448</td>
-<td align="right">-0.073</td>
-<td align="right">-0.073</td>
-<td align="right">-0.148</td>
+<td align="right">0.443</td>
+<td align="right">-0.071</td>
+<td align="right">-0.071</td>
+<td align="right">-0.154</td>
 </tr>
 <tr class="odd">
 <td align="right">2017</td>
 <td align="right">3</td>
 <td align="right">1</td>
-<td align="right">0.520</td>
-<td align="right">-0.102</td>
-<td align="right">-0.102</td>
-<td align="right">-0.084</td>
+<td align="right">0.514</td>
+<td align="right">-0.099</td>
+<td align="right">-0.099</td>
+<td align="right">-0.091</td>
 </tr>
 <tr class="even">
 <td align="right">2018</td>
 <td align="right">3</td>
 <td align="right">1</td>
-<td align="right">0.529</td>
-<td align="right">-0.102</td>
-<td align="right">-0.102</td>
-<td align="right">-0.086</td>
+<td align="right">0.522</td>
+<td align="right">-0.099</td>
+<td align="right">-0.099</td>
+<td align="right">-0.093</td>
 </tr>
 <tr class="odd">
 <td align="right">2019</td>
 <td align="right">3</td>
 <td align="right">1</td>
-<td align="right">0.521</td>
-<td align="right">-0.102</td>
-<td align="right">-0.102</td>
-<td align="right">-0.075</td>
+<td align="right">0.515</td>
+<td align="right">-0.099</td>
+<td align="right">-0.099</td>
+<td align="right">-0.082</td>
 </tr>
 <tr class="even">
 <td align="right">2017</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">0.614</td>
+<td align="right">-0.386</td>
+<td align="right">0.000</td>
+<td align="right">0.008</td>
+</tr>
+<tr class="odd">
+<td align="right">2018</td>
 <td align="right">3</td>
 <td align="right">2</td>
 <td align="right">0.622</td>
 <td align="right">-0.378</td>
 <td align="right">0.000</td>
-<td align="right">0.018</td>
-</tr>
-<tr class="odd">
-<td align="right">2018</td>
-<td align="right">3</td>
-<td align="right">2</td>
-<td align="right">0.631</td>
-<td align="right">-0.369</td>
-<td align="right">0.000</td>
-<td align="right">0.016</td>
+<td align="right">0.006</td>
 </tr>
 <tr class="even">
 <td align="right">2019</td>
 <td align="right">3</td>
 <td align="right">2</td>
-<td align="right">0.623</td>
-<td align="right">-0.377</td>
+<td align="right">0.614</td>
+<td align="right">-0.386</td>
 <td align="right">0.000</td>
-<td align="right">0.027</td>
+<td align="right">0.017</td>
 </tr>
 </tbody>
 </table>
