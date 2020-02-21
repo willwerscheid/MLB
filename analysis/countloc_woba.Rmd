@@ -111,5 +111,5 @@ ggplot(plot_df,
 ```
 
 ```{r save_res}
-saveRDS(all_pitches, "output/count_woba.rds")
+saveRDS(event_vals, "output/event_vals.rds")
 ```
