@@ -135,7 +135,7 @@ ggplot(player_res, aes(x = `2018`, y = `2019`)) +
 
 This is good: players who have above-average plate discipline tend to stay above average, and vice versa.
 
-## Results: First-pitch wOBA added
+## Results: First pitch
 
 I'm also interesting in results for particular pitch counts. For example, I'd like to know who has the best (and worst) plate discipline when the count is 0-0:
 
