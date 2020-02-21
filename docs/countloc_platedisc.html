@@ -534,10 +534,10 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtree46404762cc04c8195573233f0d2f6efd92689753targetblank4640476a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/MLB/tree/46404762cc04c8195573233f0d2f6efd92689753" target="_blank">4640476</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtreeb4b2983fcf30e5d285ba20a4bd9a14a269ab3d5ftargetblankb4b2983a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/MLB/tree/b4b2983fcf30e5d285ba20a4bd9a14a269ab3d5f" target="_blank">b4b2983</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtree46404762cc04c8195573233f0d2f6efd92689753targetblank4640476a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtreeb4b2983fcf30e5d285ba20a4bd9a14a269ab3d5ftargetblankb4b2983a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -623,6 +623,40 @@ Message
 Rmd
 </td>
 <td>
+<a href="https://github.com/willwerscheid/MLB/blob/b4b2983fcf30e5d285ba20a4bd9a14a269ab3d5f/analysis/countloc_platedisc.Rmd" target="_blank">b4b2983</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-02-21
+</td>
+<td>
+wflow_publish(“analysis/countloc_platedisc.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/MLB/2ea6ca8526caf480399d83fe19580d1b7641b551/docs/countloc_platedisc.html" target="_blank">2ea6ca8</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-02-21
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
 <a href="https://github.com/willwerscheid/MLB/blob/46404762cc04c8195573233f0d2f6efd92689753/analysis/countloc_platedisc.Rmd" target="_blank">4640476</a>
 </td>
 <td>
@@ -694,6 +728,43 @@ ggplot(plot_df, aes(x = plate_x, y = plate_z, fill = swing_benefit)) +
   geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0)) +
   facet_wrap(~count, nrow = 4, ncol = 3)</code></pre>
 <p><img src="figure/countloc_platedisc.Rmd/swing_val-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-swing_val-1">
+Past versions of swing_val-1.png
+</button>
+</p>
+<div id="fig-swing_val-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/willwerscheid/MLB/blob/2ea6ca8526caf480399d83fe19580d1b7641b551/docs/figure/countloc_platedisc.Rmd/swing_val-1.png" target="_blank">2ea6ca8</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-02-21
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>Almost there: the last building block I need is an estimate of average hitters’ swing rates. I don’t want to give too much credit for making an easy decision: it’s much better not to swing when there are three balls and the pitch is low and outside, but if 99% of hitters decline to swing, then they shouldn’t be singled out for praise (I do, however, want to punish the 1% who do swing at these pitches). In other words, I’d like to evalute a hitter’s decision to swing or not to swing relative to an average hitter in a similar situation (i.e., same pitch count, same pitch location).</p>
 <pre class="r"><code>all_pitches &lt;- all_pitches %&gt;%
   mutate(avg_wOBA_chg = p_swing * swing_value + (1 - p_swing) * take_value,
@@ -710,48 +781,48 @@ knitr::kable(ex %&gt;% select(balls:HIP_value), digits = 3)</code></pre>
 <table>
 <thead>
 <tr class="header">
-<th align="right">balls</th>
-<th align="right">strikes</th>
-<th align="right">plate_x</th>
-<th align="right">plate_z</th>
-<th align="right">swing</th>
-<th align="right">contact</th>
-<th align="right">foul</th>
-<th align="right">called_strike</th>
-<th align="right">ball_value</th>
-<th align="right">strike_value</th>
-<th align="right">foul_value</th>
-<th align="right">HIP_value</th>
+<th align="left">balls</th>
+<th align="left">strikes</th>
+<th align="left">plate_x</th>
+<th align="left">plate_z</th>
+<th align="left">swing</th>
+<th align="left">contact</th>
+<th align="left">foul</th>
+<th align="left">called_strike</th>
+<th align="left">ball_value</th>
+<th align="left">strike_value</th>
+<th align="left">foul_value</th>
+<th align="left">HIP_value</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0.4</td>
-<td align="right">1.0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0.041</td>
-<td align="right">-0.051</td>
-<td align="right">-0.051</td>
-<td align="right">0.059</td>
+<td align="left">0</td>
+<td align="left">0</td>
+<td align="left">0.4</td>
+<td align="left">1.0</td>
+<td align="left">0</td>
+<td align="left">0</td>
+<td align="left">0</td>
+<td align="left">0</td>
+<td align="left">0.041</td>
+<td align="left">-0.051</td>
+<td align="left">-0.051</td>
+<td align="left">0.059</td>
 </tr>
 <tr class="even">
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">-0.4</td>
-<td align="right">3.2</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0.067</td>
-<td align="right">-0.061</td>
-<td align="right">-0.061</td>
-<td align="right">0.018</td>
+<td align="left">1</td>
+<td align="left">0</td>
+<td align="left">-0.4</td>
+<td align="left">3.2</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">0</td>
+<td align="left">0</td>
+<td align="left">0.067</td>
+<td align="left">-0.061</td>
+<td align="left">-0.061</td>
+<td align="left">0.018</td>
 </tr>
 </tbody>
 </table>
@@ -759,42 +830,42 @@ knitr::kable(ex %&gt;% select(balls:HIP_value), digits = 3)</code></pre>
 <table>
 <thead>
 <tr class="header">
-<th align="right">balls</th>
-<th align="right">strikes</th>
-<th align="right">p_strike</th>
-<th align="right">p_contact</th>
-<th align="right">p_foul</th>
-<th align="right">p_swing</th>
-<th align="right">swing_value</th>
-<th align="right">take_value</th>
-<th align="right">avg_wOBA_chg</th>
-<th align="right">wOBAaa</th>
+<th align="left">balls</th>
+<th align="left">strikes</th>
+<th align="left">p_strike</th>
+<th align="left">p_contact</th>
+<th align="left">p_foul</th>
+<th align="left">p_swing</th>
+<th align="left">swing_value</th>
+<th align="left">take_value</th>
+<th align="left">avg_wOBA_chg</th>
+<th align="left">wOBAaa</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0.000</td>
-<td align="right">0.416</td>
-<td align="right">0.487</td>
-<td align="right">0.176</td>
-<td align="right">-0.027</td>
-<td align="right">0.041</td>
-<td align="right">0.029</td>
-<td align="right">0.012</td>
+<td align="left">0</td>
+<td align="left">0</td>
+<td align="left">0.000</td>
+<td align="left">0.416</td>
+<td align="left">0.487</td>
+<td align="left">0.176</td>
+<td align="left">-0.027</td>
+<td align="left">0.041</td>
+<td align="left">0.029</td>
+<td align="left">0.012</td>
 </tr>
 <tr class="even">
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0.879</td>
-<td align="right">0.794</td>
-<td align="right">0.576</td>
-<td align="right">0.623</td>
-<td align="right">-0.035</td>
-<td align="right">-0.046</td>
-<td align="right">-0.039</td>
-<td align="right">0.004</td>
+<td align="left">1</td>
+<td align="left">0</td>
+<td align="left">0.879</td>
+<td align="left">0.794</td>
+<td align="left">0.576</td>
+<td align="left">0.623</td>
+<td align="left">-0.035</td>
+<td align="left">-0.046</td>
+<td align="left">-0.039</td>
+<td align="left">0.004</td>
 </tr>
 </tbody>
 </table>
@@ -1028,10 +1099,47 @@ knitr::kable(player_res %&gt;% top_n(20, `2019`) %&gt;% arrange(desc(`2019`)), d
   geom_abline(slope = 1, linetype = &quot;dashed&quot;)</code></pre>
 <pre><code>#&gt; Warning: Removed 245 rows containing missing values (geom_point).</code></pre>
 <p><img src="figure/countloc_platedisc.Rmd/autocor-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-autocor-1">
+Past versions of autocor-1.png
+</button>
+</p>
+<div id="fig-autocor-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/willwerscheid/MLB/blob/2ea6ca8526caf480399d83fe19580d1b7641b551/docs/figure/countloc_platedisc.Rmd/autocor-1.png" target="_blank">2ea6ca8</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-02-21
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>This is good: players who have above-average plate discipline tend to stay above average, and vice versa.</p>
 </div>
-<div id="results-first-pitch-woba-added" class="section level2">
-<h2>Results: First-pitch wOBA added</h2>
+<div id="results-first-pitch" class="section level2">
+<h2>Results: First pitch</h2>
 <p>I’m also interesting in results for particular pitch counts. For example, I’d like to know who has the best (and worst) plate discipline when the count is 0-0:</p>
 <pre class="r"><code>first_pitch &lt;- all_pitches %&gt;%
   filter(balls == 0, strikes == 0) %&gt;%
@@ -1172,6 +1280,43 @@ ggplot(plot_df, aes(x = plate_x, y = plate_z, shape = factor(swing), col = wOBAa
   geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0), col = &quot;black&quot;) +
   facet_wrap(~player_name)</code></pre>
 <p><img src="figure/countloc_platedisc.Rmd/fp_details-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-fp_details-1">
+Past versions of fp_details-1.png
+</button>
+</p>
+<div id="fig-fp_details-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/willwerscheid/MLB/blob/2ea6ca8526caf480399d83fe19580d1b7641b551/docs/figure/countloc_platedisc.Rmd/fp_details-1.png" target="_blank">2ea6ca8</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-02-21
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>Clearly, Lucroy is taking too many pitches over the middle of the plate: as a result, he loses about 8 points of wOBA. Khris Davis swings at most of these pitches, and while he also swings at a few pitches outside the zone, he ends up netting around 7 points of wOBA at 0-0.</p>
 </div>
 <div id="results-full-count" class="section level2">
@@ -1316,6 +1461,43 @@ ggplot(plot_df, aes(x = plate_x, y = plate_z, shape = factor(swing), col = wOBAa
   geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0), col = &quot;black&quot;) +
   facet_wrap(~player_name)</code></pre>
 <p><img src="figure/countloc_platedisc.Rmd/fc_details-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-fc_details-1">
+Past versions of fc_details-1.png
+</button>
+</p>
+<div id="fig-fc_details-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/willwerscheid/MLB/blob/2ea6ca8526caf480399d83fe19580d1b7641b551/docs/figure/countloc_platedisc.Rmd/fc_details-1.png" target="_blank">2ea6ca8</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-02-21
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>Voit almost always takes on 3-2, while Baez chases a lot of bad pitches. As a result, Voit gains an expected 71 points of wOBA, while Baez loses a whopping 122. (I emphasize that this is only for PAs that reach full count: it does not subtract 122 points from Baez’s total wOBA, but rather, since only around 11% of his PAs reach full count, the overall penalty is 14 points.)</p>
 </div>
 <div id="appendix-pitch-selection" class="section level2">
@@ -1336,6 +1518,43 @@ ggplot(plot_df, aes(x = plate_x, y = plate_z, fill = avg_wOBA_chg)) +
   geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0)) +
   facet_wrap(~count, nrow = 4, ncol = 3)</code></pre>
 <p><img src="figure/countloc_platedisc.Rmd/pitch_rec-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-pitch_rec-1">
+Past versions of pitch_rec-1.png
+</button>
+</p>
+<div id="fig-pitch_rec-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/willwerscheid/MLB/blob/2ea6ca8526caf480399d83fe19580d1b7641b551/docs/figure/countloc_platedisc.Rmd/pitch_rec-1.png" target="_blank">2ea6ca8</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-02-21
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <br> <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
