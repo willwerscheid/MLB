@@ -78,7 +78,7 @@ all_pitches <- mlb %>%
   left_join(PA_df, by = c("game_date", "home_team", "at_bat_number")) %>%
   filter(!is_doubleheader)
 
-# Calculate the wOBA values for each PA outcome.
+# Get the wOBA values for each PA outcome.
 all_pitches <- all_pitches %>%
   mutate_at(vars(woba_value, woba_denom), ~ replace_na(., 0))
 PA_woba <- all_pitches %>%
@@ -122,30 +122,38 @@ paste0(round(100 * (prev_nrow - nrow(all_pitches)) / prev_nrow, 1),
        "% of pitches removed")
 ```
 
+## Flip location data for left-handed hitters
+
+Since right-handed hitters' preferred pitch zones are mirror images of left-handed hitters', I flip the $x$-axis for pitches to lefties. This transformation eliminates the need to condition on handedness in subsequent computations.
+
+```{r flip}
+all_pitches <- all_pitches %>%
+  mutate(plate_x = ifelse(stand == "L", -plate_x, plate_x))
+```
+
 ## Bin location data
 
-This final step is the most sensitive part of the preprocessing. I'd like to bin the pitch locations to get nonparametric estimates of swing rates and contact rates. I want to use as fine a grid as possible while retaining enough data points per bin to get reasonably accurate estimates. After some fiddling, I settled on bins with widths and heights of 0.2 feet (2.4 inches). I discarded pitches that landed in very sparsely populated bins: these are pitches that are located far off the plate and are easy to lay off of, so they don't tell us much about plate discipline. Nor do they tell us much about contact rates: it's not unreasonable to imagine that a batter who swings at one of these pitches sees a crushable softball pitch, so that the sample of pitches that are swung at is especially unrepresentative of all pitches to that location. I'll have more to say about this step when I discuss metrics for hitter contact.
+This final step is the most sensitive part of the preprocessing. I'd like to bin the pitch locations to get nonparametric estimates of swing rates and contact rates. I want to use as fine a grid as possible while retaining enough data points per bin to get reasonably accurate estimates. After some fiddling, I settled on bins with widths and heights of 0.2 feet (2.4 inches). I discarded pitches that landed in very sparsely populated bins: these are pitches that are located far off the plate and are easy to lay off of, so they don't tell us much about plate discipline. I'll have more to say about this step when I discuss metrics for hitter contact.
 
-In the plot below, the dashed lines indicate the average strike zone. The green bins are the ones that I've retained.
+In the plot below, the dashed lines indicate the [theoretical strike zone](https://www.baseballprospectus.com/news/article/37347/robo-strike-zone-not-simple-think/). The green bins are the ones that I've retained.
 
 ```{r loc}
 prev_nrow <- nrow(all_pitches)
 
 all_pitches <- all_pitches %>%
   mutate(plate_x = round(plate_x / 2, 1) * 2,
-         plate_z = round(plate_z / 2, 1) * 2)
+         plate_z = round(plate_z / 2, 1) * 2) %>%
+  group_by(plate_x, plate_z)
 
-sz_bot <- mean(all_pitches$sz_bot)
-sz_top <- mean(all_pitches$sz_top)
-sz_left <- -8.5 / 12
-sz_right <- 8.5 / 12
+plate_left <- -8.5 / 12
+plate_right <- 8.5 / 12
+sz_left <- plate_left - 2.94 / 2 / 12
+sz_right <- plate_right + 2.94 / 2 / 12
+sz_bot <- 15.53 / 12
+sz_top <- 42.47 / 12
 
-ggplot(all_pitches %>% 
-         group_by(plate_x, plate_z, stand) %>% 
-         summarize(n = n()) %>%
-         group_by(plate_x, plate_z) %>%
-         summarize(is.kept = min(n) >= 1000, n = sum(n)), 
-       aes(plate_x, plate_z, fill = is.kept, alpha = n)) +
+ggplot(all_pitches %>% summarize(n = n()), 
+       aes(plate_x, plate_z, fill = n >= 1000, alpha = n)) +
   geom_tile() + 
   xlim(c(-5, 5)) +
   ylim(c(-3, 7)) +
@@ -154,10 +162,9 @@ ggplot(all_pitches %>%
   scale_fill_manual(values = c("grey", "dark green")) +
   geom_rect(aes(xmin = sz_left, xmax = sz_right, ymin = sz_bot, ymax = sz_top),
                 col = "black", linetype = "dashed", alpha = 0) +
-  geom_segment(aes(x = sz_left, xend = sz_right, y = 0, yend = 0))
+  geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0))
   
 all_pitches <- all_pitches %>%
-  group_by(plate_x, plate_z, stand) %>%
   filter(length(plate_x) >= 1000) %>%
   ungroup()
 
