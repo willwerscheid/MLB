@@ -1,5 +1,5 @@
 ---
-title: "Swing, called strike, and contact probabilities"
+title: "Swing, called strike, contact, and foul probabilities"
 author: "Jason Willwerscheid"
 date: "2/20/2020"
 output: html_document
@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, comment = "#>")
 ```
 
-I'll need three probabilities that condition on pitch location. First, I'll need the probability that an average batter will swing at a pitch, conditional on the pitch count and the location of the pitch. Second, I'll need the probability that a pitch will be called a strike, conditional on the pitch location and the batter not swinging. And finally, I'll need the probability that an average batter will make contact with a pitch, conditional on the pitch location and the batter swinging. I make the simplifying assumption that the latter two probabilities are independent of the pitch count. This is not actually true: umpires are more reluctant to call strike three than strikes one and two, and hitters can afford to be choosier when the count is in their favor. It'd be a good idea to revisit this analysis in the future to see how things change when everything is conditioned on pitch count.
+I'll need four probabilities that condition on pitch location. First, I'll need the probability that an average batter will swing at a pitch, conditional on the pitch count and the location of the pitch. Second, I'll need the probability that a pitch will be called a strike, conditional on the pitch location and the batter not swinging. Third, I'll need the probability that an average batter will make contact with a pitch, conditional on the pitch location and the batter swinging. And finally, I'll need the probability that the ball will be hit foul, conditional on the pitch location and the batter making contact. I make the simplifying assumption that the latter three probabilities are independent of the pitch count. This is not actually true: for example, umpires are more reluctant to call strike three than strikes one and two, and hitters can afford to be choosier when the count is in their favor. It'd be a good idea to revisit this analysis in the future to see how things change when everything is conditioned on pitch count.
 
 ## Called strike probabilities
 
@@ -92,11 +92,34 @@ ggplot(smooth_contact, aes(x = plate_x, y = plate_z, fill = p_contact)) +
   geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0))
 ```
 
-## Swing probabilites
+## Foul probabilities
+
+Next up is
+$$ p(\text{foul} \mid \text{pitch location, contact}) $$
+
+I again do a small amount of smoothing.
+
+```{r fouls}
+fouls <- all_pitches %>%
+  filter(contact == 1) %>%
+  group_by(plate_x, plate_z) %>%
+  summarize(n = n(), p_foul = sum(foul) / n()) %>%
+  ungroup() %>%
+  mutate(p_foul = smooth_probs(plate_x, plate_z, n, p_foul, k = 100))
+
+ggplot(fouls, aes(x = plate_x, y = plate_z, fill = p_foul)) + 
+  geom_tile() +
+  scale_fill_gradient(low = "white", high = "blue") +
+  geom_rect(aes(xmin = sz_left, xmax = sz_right, ymin = sz_bot, ymax = sz_top),
+                col = "black", linetype = "dashed", alpha = 0) +
+  geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0))
+```
+
+## Swing probabilities
 
 Finally I calculate
 $$ p(\text{swing} \mid \text{count, pitch location}) $$
-I again do a small amount of smoothing. Few plate appearances go to 3-0, so those probabilites appear noisy even after smoothing, but I prefer to leave the estimates as they are: oversmoothing yields estimates that are too high at the margins (and thus systematically biased rather than merely noisy).
+Few plate appearances go to 3-0, so those probabilites appear noisy even after smoothing, but I prefer to leave the estimates as they are: oversmoothing yields estimates that are too high at the margins (and thus systematically biased rather than merely noisy).
 
 ```{r swings}
 swings <- all_pitches %>%
@@ -117,6 +140,6 @@ ggplot(swings %>% mutate(pitch_count = paste(balls, strikes, sep = "-")),
 ```
 
 ```{r save_res}
-pitchloc_res <- list(looks = looks, contact = contact, swings = swings)
+pitchloc_res <- list(looks = looks, contact = contact, fouls = fouls, swings = swings)
 saveRDS(pitchloc_res, "output/pitchloc_res.rds")
 ```
