@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Jason Willwerscheid" />
+
+
+<title>Plate discipline wOBA component</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">MLB</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Plate discipline wOBA component</h1>
+<h4 class="author">Jason Willwerscheid</h4>
+<h4 class="date">2/20/2020</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#report"> Report <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2020-02-21
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>MLB/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.2.0). The <em>Report</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="report" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20200202code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20200202)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20200202code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20200202)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtree46404762cc04c8195573233f0d2f6efd92689753targetblank4640476a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/MLB/tree/46404762cc04c8195573233f0d2f6efd92689753" target="_blank">4640476</a> </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtree46404762cc04c8195573233f0d2f6efd92689753targetblank4640476a" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .RData
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    data/mlb2017data.rds
+    Ignored:    data/mlb2018data.rds
+    Ignored:    data/mlb2019data.rds
+
+Untracked files:
+    Untracked:  .DS_Store
+    Untracked:  code/BBrates.R
+    Untracked:  code/park_factors.R
+    Untracked:  code/xBB.R
+    Untracked:  data/.DS_Store
+    Untracked:  data/SteamerProjBatters2019.csv
+    Untracked:  data/exit_velocity-2018.csv
+    Untracked:  data/exit_velocity-2019.csv
+    Untracked:  data/expected_stats-2018.csv
+    Untracked:  data/expected_stats-2019.csv
+    Untracked:  data/fangraphs-2018.csv
+    Untracked:  data/fangraphs-2019.csv
+    Untracked:  data/standard2015NP.csv
+    Untracked:  data/standard2016.csv
+    Untracked:  data/standard2016NP.csv
+    Untracked:  data/standard2017.csv
+    Untracked:  data/standard2017NP.csv
+    Untracked:  data/standard2018.csv
+    Untracked:  data/standard2018NP.csv
+    Untracked:  data/standard2019.csv
+    Untracked:  data/standard2019NP.csv
+    Untracked:  output/event_vals.rds
+    Untracked:  output/mlb_preproc.rds
+    Untracked:  output/pitchloc_res.rds
+
+Unstaged changes:
+    Modified:   .gitignore
+    Deleted:    output/README.md
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the R Markdown and HTML files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view them.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/willwerscheid/MLB/blob/46404762cc04c8195573233f0d2f6efd92689753/analysis/countloc_platedisc.Rmd" target="_blank">4640476</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-02-21
+</td>
+<td>
+wflow_publish(“analysis/countloc_platedisc.Rmd”)
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>My plate discipline metrics follow from the idea that a value can be assigned to either taking or swinging at a pitch, based solely on the pitch count and the location of the pitch.</p>
+<p>The idea builds upon Tango, Lichtman, and Dolphin’s argument that each pitch count can be associated with an expected wOBA (weighted on-base average). It was also Tango, I think, who developed the wOBACON statistic. The statistic is somewhat erroneously named: “CON” stands for contact, but wOBACON is actually the expected wOBA conditional on a ball being put into play (that is, it excludes foul balls). I calculate year-to-year wOBACON and count-specific wOBA values <a href="countloc_woba.html">here</a>.</p>
+<p>The crux of Tango and co.’s argument is that every pitch brings about a change of state: from one pitch count to another, or from a pitch count to a ball in play. My observation is that the decision to swing or not to swing limits the possibilities: if a batter swings, the result can be a strike, foul, or ball in play, while taking the pitch can only result in a ball or strike.</p>
+<p>For example, let the count be 2-1. The expected change in wOBA conditional on the batter swinging is: <span class="math display">\[ (1 - p_{\text{contact}} + p_{\text{contact}} p_{\text{foul}}) (\text{wOBA}_{\text{2-2}} - \text{wOBA}_{\text{2-1}}) + p_{\text{contact}} (1 - p_{foul}) (\text{wOBACON} - \text{wOBA}_{\text{2-1}}) \]</span> The expected change conditional on the batter taking the pitch is: <span class="math display">\[ p_{strike} (\text{wOBA}_{\text{2-2}} - \text{wOBA}_{\text{2-1}}) + (1 -  p_{strike}) (\text{wOBA}_{\text{3-1}} - \text{wOBA}_{\text{2-1}}) \]</span></p>
+<p>I evaluate plate discipline by abstracting away a hitter’s individual ability to make contact. In other words, I calculate <span class="math inline">\(p_{\text{contact}}\)</span> (the probability of making contact with a pitch) and <span class="math inline">\(p_{\text{foul}}\)</span> (the probability of fouling off a pitch, conditional on making contact) for an <strong>average</strong> hitter, conditioning only on pitch location. I calculate these probabilities <a href="countloc_pitchloc.html">here</a>.</p>
+<p>For each pitch, then, I have a way to calculate the expected change in wOBA when an average batter swings at a pitch and when an average batter takes a pitch. This says something about, for example, when an average batter should be swinging:</p>
+<pre class="r"><code>suppressMessages(library(tidyverse))
+
+all_pitches &lt;- readRDS(&quot;output/mlb_preproc.rds&quot;)
+event_vals &lt;- readRDS(&quot;output/event_vals.rds&quot;)
+pitchloc_res &lt;- readRDS(&quot;output/pitchloc_res.rds&quot;)
+
+all_pitches &lt;- all_pitches %&gt;%
+  left_join(event_vals, by = c(&quot;game_year&quot;, &quot;balls&quot;, &quot;strikes&quot;)) %&gt;%
+  left_join(pitchloc_res$looks, by = c(&quot;plate_x&quot;, &quot;plate_z&quot;)) %&gt;%
+  left_join(pitchloc_res$contact, by = c(&quot;plate_x&quot;, &quot;plate_z&quot;)) %&gt;%
+  left_join(pitchloc_res$fouls, by = c(&quot;plate_x&quot;, &quot;plate_z&quot;)) %&gt;%
+  left_join(pitchloc_res$swings, by = c(&quot;plate_x&quot;, &quot;plate_z&quot;, &quot;balls&quot;, &quot;strikes&quot;))
+
+# Values of p_foul are NA for locations where no batters swung. These can be safely
+#   set to zero.
+all_pitches &lt;- all_pitches %&gt;%
+  mutate(p_foul = ifelse(is.na(p_foul), 0, p_foul))
+
+all_pitches &lt;- all_pitches %&gt;%
+  mutate(swing_value = (1 - p_contact) * strike_value + p_contact * p_foul * foul_value +
+           p_contact * (1 - p_foul) * HIP_value,
+         take_value = p_strike * strike_value + (1 - p_strike) * ball_value)
+
+plot_df &lt;- all_pitches %&gt;%
+  group_by(balls, strikes, plate_x, plate_z) %&gt;%
+  summarize(swing_benefit = mean(swing_value - take_value)) %&gt;%
+  ungroup() %&gt;%
+  mutate(count = paste(balls, strikes, sep = &quot;-&quot;))
+
+plate_left &lt;- -8.5 / 12
+plate_right &lt;- 8.5 / 12
+sz_left &lt;- plate_left - 2.94 / 2 / 12
+sz_right &lt;- plate_right + 2.94 / 2 / 12
+sz_bot &lt;- 15.53 / 12
+sz_top &lt;- 42.47 / 12
+
+ggplot(plot_df, aes(x = plate_x, y = plate_z, fill = swing_benefit)) +
+  geom_tile() +
+  scale_fill_gradient2(low = &quot;red&quot;, high = &quot;dark green&quot;) +
+  geom_rect(aes(xmin = sz_left, xmax = sz_right, ymin = sz_bot, ymax = sz_top),
+                col = &quot;black&quot;, linetype = &quot;dashed&quot;, alpha = 0) +
+  geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0)) +
+  facet_wrap(~count, nrow = 4, ncol = 3)</code></pre>
+<p><img src="figure/countloc_platedisc.Rmd/swing_val-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Almost there: the last building block I need is an estimate of average hitters’ swing rates. I don’t want to give too much credit for making an easy decision: it’s much better not to swing when there are three balls and the pitch is low and outside, but if 99% of hitters decline to swing, then they shouldn’t be singled out for praise (I do, however, want to punish the 1% who do swing at these pitches). In other words, I’d like to evalute a hitter’s decision to swing or not to swing relative to an average hitter in a similar situation (i.e., same pitch count, same pitch location).</p>
+<pre class="r"><code>all_pitches &lt;- all_pitches %&gt;%
+  mutate(avg_wOBA_chg = p_swing * swing_value + (1 - p_swing) * take_value,
+         wOBAaa = swing * swing_value + (1 - swing) * take_value - avg_wOBA_chg)</code></pre>
+</div>
+<div id="example" class="section level2">
+<h2>Example</h2>
+<p>An example might be helpful at this point. The following is a plate appearance chosen at random, featuring Aledmys Diaz at bat:</p>
+<pre class="r"><code>ex &lt;- all_pitches %&gt;%
+  filter(PA_ID == 6666) %&gt;%
+  select(player_name:called_strike, ball_value:wOBAaa) %&gt;%
+  arrange(balls + strikes)
+knitr::kable(ex %&gt;% select(balls:HIP_value), digits = 3)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="right">balls</th>
+<th align="right">strikes</th>
+<th align="right">plate_x</th>
+<th align="right">plate_z</th>
+<th align="right">swing</th>
+<th align="right">contact</th>
+<th align="right">foul</th>
+<th align="right">called_strike</th>
+<th align="right">ball_value</th>
+<th align="right">strike_value</th>
+<th align="right">foul_value</th>
+<th align="right">HIP_value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0.4</td>
+<td align="right">1.0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0.041</td>
+<td align="right">-0.051</td>
+<td align="right">-0.051</td>
+<td align="right">0.059</td>
+</tr>
+<tr class="even">
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">-0.4</td>
+<td align="right">3.2</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0.067</td>
+<td align="right">-0.061</td>
+<td align="right">-0.061</td>
+<td align="right">0.018</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>knitr::kable(ex %&gt;% select(balls:strikes, p_strike:wOBAaa), digits = 3)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="right">balls</th>
+<th align="right">strikes</th>
+<th align="right">p_strike</th>
+<th align="right">p_contact</th>
+<th align="right">p_foul</th>
+<th align="right">p_swing</th>
+<th align="right">swing_value</th>
+<th align="right">take_value</th>
+<th align="right">avg_wOBA_chg</th>
+<th align="right">wOBAaa</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0.000</td>
+<td align="right">0.416</td>
+<td align="right">0.487</td>
+<td align="right">0.176</td>
+<td align="right">-0.027</td>
+<td align="right">0.041</td>
+<td align="right">0.029</td>
+<td align="right">0.012</td>
+</tr>
+<tr class="even">
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0.879</td>
+<td align="right">0.794</td>
+<td align="right">0.576</td>
+<td align="right">0.623</td>
+<td align="right">-0.035</td>
+<td align="right">-0.046</td>
+<td align="right">-0.039</td>
+<td align="right">0.004</td>
+</tr>
+</tbody>
+</table>
+<p>The first pitch is low (the bottom of the strike zone is <code>plate_z</code> <span class="math inline">\(\approx 1.3\)</span>) and almost certain to be called a ball (<code>p_strike</code> <span class="math inline">\(\approx 0\)</span>), so it’s much more advantageous to take the pitch (the difference between <code>take_value</code> and <code>swing_value</code> is about 70 points in expected wOBA). Diaz correctly takes the pitch, but so do 82% of batters (see <code>p_swing</code>), so Diaz only gets credited with 12 points of wOBAaa. The next pitch is a probable strike (<code>p_strike</code> <span class="math inline">\(\approx 0.88\)</span>) with a good chance of contact (<code>p_contact</code> <span class="math inline">\(\approx 0.79\)</span>), so it’s more advantageous to swing even though it’s a hitter’s count (the difference is about 11 points in expected wOBA). Diaz again makes the correct decision, as do 62% of hitters, so Diaz is credited with 4 points of wOBAaa. Diaz makes contact, flying out to center field and ending the plate appearance. For this PA, then, Diaz’s plate discipline has resulted in an expected wOBA that is 16 points higher than the expected wOBA for a batter with average plate discipline.</p>
+</div>
+<div id="results-yearly-totals" class="section level2">
+<h2>Results: Yearly totals</h2>
+<p>By taking the mean over all plate appearances, I estimate the total wOBA that can be ascribed to plate discipline alone. The 2019 leaders (with a minimum of 200 PAs) are:</p>
+<pre class="r"><code>player_res &lt;- all_pitches %&gt;%
+  group_by(player_name, game_year) %&gt;%
+  summarize(n_PA = length(unique(PA_ID)),
+            PDwOBA = sum(wOBAaa) / n_PA) %&gt;%
+  ungroup() %&gt;%
+  filter(n_PA &gt;= 200) %&gt;%
+  select(-n_PA) %&gt;%
+  spread(game_year, PDwOBA) 
+
+knitr::kable(player_res %&gt;% top_n(20, `2019`) %&gt;% arrange(desc(`2019`)), digits = 3)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">player_name</th>
+<th align="right">2017</th>
+<th align="right">2018</th>
+<th align="right">2019</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Andrew McCutchen</td>
+<td align="right">0.031</td>
+<td align="right">0.035</td>
+<td align="right">0.044</td>
+</tr>
+<tr class="even">
+<td align="left">Cavan Biggio</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">0.042</td>
+</tr>
+<tr class="odd">
+<td align="left">Alex Bregman</td>
+<td align="right">0.009</td>
+<td align="right">0.029</td>
+<td align="right">0.042</td>
+</tr>
+<tr class="even">
+<td align="left">Ji-Man Choi</td>
+<td align="right">NA</td>
+<td align="right">0.016</td>
+<td align="right">0.041</td>
+</tr>
+<tr class="odd">
+<td align="left">Jordan Luplow</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">0.040</td>
+</tr>
+<tr class="even">
+<td align="left">Juan Soto</td>
+<td align="right">NA</td>
+<td align="right">0.030</td>
+<td align="right">0.039</td>
+</tr>
+<tr class="odd">
+<td align="left">Matt Joyce</td>
+<td align="right">0.027</td>
+<td align="right">0.035</td>
+<td align="right">0.036</td>
+</tr>
+<tr class="even">
+<td align="left">George Springer</td>
+<td align="right">0.020</td>
+<td align="right">0.023</td>
+<td align="right">0.036</td>
+</tr>
+<tr class="odd">
+<td align="left">Russell Martin</td>
+<td align="right">0.023</td>
+<td align="right">0.035</td>
+<td align="right">0.035</td>
+</tr>
+<tr class="even">
+<td align="left">Carlos Santana</td>
+<td align="right">0.016</td>
+<td align="right">0.024</td>
+<td align="right">0.033</td>
+</tr>
+<tr class="odd">
+<td align="left">Brandon Belt</td>
+<td align="right">0.029</td>
+<td align="right">0.026</td>
+<td align="right">0.033</td>
+</tr>
+<tr class="even">
+<td align="left">Marcus Semien</td>
+<td align="right">0.017</td>
+<td align="right">0.014</td>
+<td align="right">0.031</td>
+</tr>
+<tr class="odd">
+<td align="left">Yasmani Grandal</td>
+<td align="right">-0.007</td>
+<td align="right">0.009</td>
+<td align="right">0.031</td>
+</tr>
+<tr class="even">
+<td align="left">Kris Bryant</td>
+<td align="right">0.018</td>
+<td align="right">0.011</td>
+<td align="right">0.030</td>
+</tr>
+<tr class="odd">
+<td align="left">Joey Votto</td>
+<td align="right">0.047</td>
+<td align="right">0.044</td>
+<td align="right">0.030</td>
+</tr>
+<tr class="even">
+<td align="left">Brandon Nimmo</td>
+<td align="right">NA</td>
+<td align="right">0.041</td>
+<td align="right">0.029</td>
+</tr>
+<tr class="odd">
+<td align="left">Tony Kemp</td>
+<td align="right">NA</td>
+<td align="right">0.022</td>
+<td align="right">0.029</td>
+</tr>
+<tr class="even">
+<td align="left">Mike Trout</td>
+<td align="right">0.025</td>
+<td align="right">0.027</td>
+<td align="right">0.029</td>
+</tr>
+<tr class="odd">
+<td align="left">Chris Taylor</td>
+<td align="right">0.022</td>
+<td align="right">0.029</td>
+<td align="right">0.028</td>
+</tr>
+<tr class="even">
+<td align="left">Joe Panik</td>
+<td align="right">0.014</td>
+<td align="right">0.022</td>
+<td align="right">0.028</td>
+</tr>
+</tbody>
+</table>
+<p>According to this metric, Andrew McCutchen had the best plate discipline in baseball in 2019, despite being only 10th in BB% and league average for SO%. Two Astros also make the top ten (hmm).</p>
+<p>The bottom ten are:</p>
+<pre class="r"><code>knitr::kable(player_res %&gt;% top_n(10, desc(`2019`)) %&gt;% arrange(`2019`), digits = 3)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">player_name</th>
+<th align="right">2017</th>
+<th align="right">2018</th>
+<th align="right">2019</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Javier Baez</td>
+<td align="right">-0.038</td>
+<td align="right">-0.040</td>
+<td align="right">-0.047</td>
+</tr>
+<tr class="even">
+<td align="left">Jorge Alfaro</td>
+<td align="right">NA</td>
+<td align="right">-0.027</td>
+<td align="right">-0.044</td>
+</tr>
+<tr class="odd">
+<td align="left">Francisco Mejia</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">-0.037</td>
+</tr>
+<tr class="even">
+<td align="left">Gary Sanchez</td>
+<td align="right">-0.023</td>
+<td align="right">-0.023</td>
+<td align="right">-0.036</td>
+</tr>
+<tr class="odd">
+<td align="left">Harold Castro</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">-0.036</td>
+</tr>
+<tr class="even">
+<td align="left">Rowdy Tellez</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">-0.035</td>
+</tr>
+<tr class="odd">
+<td align="left">Ronny Rodriguez</td>
+<td align="right">NA</td>
+<td align="right">-0.016</td>
+<td align="right">-0.035</td>
+</tr>
+<tr class="even">
+<td align="left">Jose Abreu</td>
+<td align="right">-0.023</td>
+<td align="right">-0.024</td>
+<td align="right">-0.032</td>
+</tr>
+<tr class="odd">
+<td align="left">Victor Reyes</td>
+<td align="right">NA</td>
+<td align="right">-0.039</td>
+<td align="right">-0.031</td>
+</tr>
+<tr class="even">
+<td align="left">Corey Dickerson</td>
+<td align="right">-0.043</td>
+<td align="right">-0.031</td>
+<td align="right">-0.031</td>
+</tr>
+</tbody>
+</table>
+<p>To interpret: Javier Baez posted a wOBA of .347 in 2019. This is already above average, but if he had been able to improve his plate discipline to league average, then — assuming average contact rates and wOBACON — he would have posted a wOBA of .394, which would have put him in the top ten (and tied with Juan Soto).</p>
+<p>(Of course, the assumption about average contact rates and wOBACON is inaccurate; I’ll use player-specific contact rates and wOBACON in a subsequent analysis. However, I wanted to first do an analysis in which plate discipline was strictly comparable from player to player: players are penalized equally for swinging at the same bad pitches, and rewarded equally for swinging at meatballs.)</p>
+<p>As a sanity check, it’s good to verify that there is some autocorrelation from year to year. Each point in the plot below represents a player who had at least 200 PAs in both 2018 and 2019:</p>
+<pre class="r"><code>ggplot(player_res, aes(x = `2018`, y = `2019`)) + 
+  geom_point() +
+  geom_abline(slope = 1, linetype = &quot;dashed&quot;)</code></pre>
+<pre><code>#&gt; Warning: Removed 245 rows containing missing values (geom_point).</code></pre>
+<p><img src="figure/countloc_platedisc.Rmd/autocor-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>This is good: players who have above-average plate discipline tend to stay above average, and vice versa.</p>
+</div>
+<div id="results-first-pitch-woba-added" class="section level2">
+<h2>Results: First-pitch wOBA added</h2>
+<p>I’m also interesting in results for particular pitch counts. For example, I’d like to know who has the best (and worst) plate discipline when the count is 0-0:</p>
+<pre class="r"><code>first_pitch &lt;- all_pitches %&gt;%
+  filter(balls == 0, strikes == 0) %&gt;%
+  group_by(player_name, game_year) %&gt;%
+  summarize(n_PA = n(), PDwOBA = sum(wOBAaa) / n()) %&gt;%
+  ungroup() %&gt;%
+  filter(n_PA &gt;= 200) %&gt;%
+  select(-n_PA) %&gt;%
+  spread(game_year, PDwOBA) 
+knitr::kable(first_pitch %&gt;% top_n(10, `2019`) %&gt;% arrange(desc(`2019`)), digits = 3)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">player_name</th>
+<th align="right">2017</th>
+<th align="right">2018</th>
+<th align="right">2019</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Khris Davis</td>
+<td align="right">0.005</td>
+<td align="right">0.005</td>
+<td align="right">0.007</td>
+</tr>
+<tr class="even">
+<td align="left">Brandon Lowe</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">0.007</td>
+</tr>
+<tr class="odd">
+<td align="left">Freddie Freeman</td>
+<td align="right">0.004</td>
+<td align="right">0.006</td>
+<td align="right">0.006</td>
+</tr>
+<tr class="even">
+<td align="left">Luke Voit</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">0.006</td>
+</tr>
+<tr class="odd">
+<td align="left">Chris Taylor</td>
+<td align="right">0.001</td>
+<td align="right">0.003</td>
+<td align="right">0.005</td>
+</tr>
+<tr class="even">
+<td align="left">Oscar Mercado</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">0.005</td>
+</tr>
+<tr class="odd">
+<td align="left">Jordan Luplow</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">0.005</td>
+</tr>
+<tr class="even">
+<td align="left">Jeff McNeil</td>
+<td align="right">NA</td>
+<td align="right">0.005</td>
+<td align="right">0.005</td>
+</tr>
+<tr class="odd">
+<td align="left">Kole Calhoun</td>
+<td align="right">0.002</td>
+<td align="right">0.004</td>
+<td align="right">0.005</td>
+</tr>
+<tr class="even">
+<td align="left">Jake Marisnick</td>
+<td align="right">0.000</td>
+<td align="right">0.000</td>
+<td align="right">0.004</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>knitr::kable(first_pitch %&gt;% top_n(5, desc(`2019`)) %&gt;% arrange(`2019`), digits = 3)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">player_name</th>
+<th align="right">2017</th>
+<th align="right">2018</th>
+<th align="right">2019</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Jonathan Lucroy</td>
+<td align="right">-0.005</td>
+<td align="right">-0.004</td>
+<td align="right">-0.008</td>
+</tr>
+<tr class="even">
+<td align="left">Ronny Rodriguez</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">-0.007</td>
+</tr>
+<tr class="odd">
+<td align="left">Curtis Granderson</td>
+<td align="right">-0.003</td>
+<td align="right">-0.003</td>
+<td align="right">-0.006</td>
+</tr>
+<tr class="even">
+<td align="left">David Fletcher</td>
+<td align="right">NA</td>
+<td align="right">-0.004</td>
+<td align="right">-0.005</td>
+</tr>
+<tr class="odd">
+<td align="left">Victor Reyes</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">-0.005</td>
+</tr>
+</tbody>
+</table>
+<p>To see what’s driving these numbers, I compare the 2019 swing charts of Khris Davis and Jonathan Lucroy, limiting results to 0-0 pitches:</p>
+<pre class="r"><code>plot_df &lt;- all_pitches %&gt;%
+  filter(balls == 0, strikes == 0, game_year == 2019,
+         player_name %in% c(&quot;Khris Davis&quot;, &quot;Jonathan Lucroy&quot;))
+
+ggplot(plot_df, aes(x = plate_x, y = plate_z, shape = factor(swing), col = wOBAaa)) +
+  geom_jitter() +
+  scale_shape_manual(values = c(&quot;circle&quot;, &quot;cross&quot;)) +
+  scale_color_gradient2(low = &quot;red&quot;, high = &quot;dark green&quot;) +
+  theme_minimal() +
+  geom_rect(aes(xmin = sz_left, xmax = sz_right, ymin = sz_bot, ymax = sz_top),
+                col = &quot;black&quot;, linetype = &quot;dashed&quot;, alpha = 0) +
+  geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0), col = &quot;black&quot;) +
+  facet_wrap(~player_name)</code></pre>
+<p><img src="figure/countloc_platedisc.Rmd/fp_details-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Clearly, Lucroy is taking too many pitches over the middle of the plate: as a result, he loses about 8 points of wOBA. Khris Davis swings at most of these pitches, and while he also swings at a few pitches outside the zone, he ends up netting around 7 points of wOBA at 0-0.</p>
+</div>
+<div id="results-full-count" class="section level2">
+<h2>Results: Full count</h2>
+<p>I repeat the analysis for 3-2, which is the count with by far the highest leverage. I limit results to players who have at least 40 PAs that have reached 3-2 (these results are much noisier, since there are necessarily fewer PAs that reach a full count):</p>
+<pre class="r"><code>full_count &lt;- all_pitches %&gt;%
+  filter(balls == 3, strikes == 2) %&gt;%
+  group_by(player_name, game_year) %&gt;%
+  summarize(n_PA = length(unique(PA_ID)), PDwOBA = sum(wOBAaa) / n()) %&gt;%
+  ungroup() %&gt;%
+  filter(n_PA &gt;= 40) %&gt;%
+  select(-n_PA) %&gt;%
+  spread(game_year, PDwOBA) 
+knitr::kable(full_count %&gt;% top_n(10, `2019`) %&gt;% arrange(desc(`2019`)), digits = 3)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">player_name</th>
+<th align="right">2017</th>
+<th align="right">2018</th>
+<th align="right">2019</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Luke Voit</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">0.071</td>
+</tr>
+<tr class="even">
+<td align="left">Howie Kendrick</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">0.070</td>
+</tr>
+<tr class="odd">
+<td align="left">Wilson Ramos</td>
+<td align="right">NA</td>
+<td align="right">0.023</td>
+<td align="right">0.068</td>
+</tr>
+<tr class="even">
+<td align="left">Ji-Man Choi</td>
+<td align="right">NA</td>
+<td align="right">0.020</td>
+<td align="right">0.067</td>
+</tr>
+<tr class="odd">
+<td align="left">Robbie Grossman</td>
+<td align="right">0.054</td>
+<td align="right">0.039</td>
+<td align="right">0.063</td>
+</tr>
+<tr class="even">
+<td align="left">Billy Hamilton</td>
+<td align="right">0.016</td>
+<td align="right">-0.030</td>
+<td align="right">0.061</td>
+</tr>
+<tr class="odd">
+<td align="left">Cavan Biggio</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">0.060</td>
+</tr>
+<tr class="even">
+<td align="left">Robinson Chirinos</td>
+<td align="right">0.004</td>
+<td align="right">0.025</td>
+<td align="right">0.059</td>
+</tr>
+<tr class="odd">
+<td align="left">David Bote</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">0.059</td>
+</tr>
+<tr class="even">
+<td align="left">Joey Gallo</td>
+<td align="right">0.024</td>
+<td align="right">0.056</td>
+<td align="right">0.057</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>knitr::kable(full_count %&gt;% top_n(5, desc(`2019`)) %&gt;% arrange(`2019`), digits = 3)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">player_name</th>
+<th align="right">2017</th>
+<th align="right">2018</th>
+<th align="right">2019</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Javier Baez</td>
+<td align="right">-0.070</td>
+<td align="right">-0.047</td>
+<td align="right">-0.122</td>
+</tr>
+<tr class="even">
+<td align="left">Shohei Ohtani</td>
+<td align="right">NA</td>
+<td align="right">-0.015</td>
+<td align="right">-0.092</td>
+</tr>
+<tr class="odd">
+<td align="left">Matt Adams</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">-0.086</td>
+</tr>
+<tr class="even">
+<td align="left">Colin Moran</td>
+<td align="right">NA</td>
+<td align="right">0.027</td>
+<td align="right">-0.082</td>
+</tr>
+<tr class="odd">
+<td align="left">Jose Abreu</td>
+<td align="right">-0.054</td>
+<td align="right">-0.023</td>
+<td align="right">-0.073</td>
+</tr>
+</tbody>
+</table>
+<p>I compare 2019 swing charts for Luke Voit and Javier Baez:</p>
+<pre class="r"><code>plot_df &lt;- all_pitches %&gt;%
+  filter(balls == 3, strikes == 2, game_year == 2019,
+         player_name %in% c(&quot;Luke Voit&quot;, &quot;Javier Baez&quot;))
+
+ggplot(plot_df, aes(x = plate_x, y = plate_z, shape = factor(swing), col = wOBAaa)) +
+  geom_jitter() +
+  scale_shape_manual(values = c(&quot;circle&quot;, &quot;cross&quot;)) +
+  scale_color_gradient2(low = &quot;red&quot;, high = &quot;dark green&quot;) +
+  theme_minimal() +
+  geom_rect(aes(xmin = sz_left, xmax = sz_right, ymin = sz_bot, ymax = sz_top),
+                col = &quot;black&quot;, linetype = &quot;dashed&quot;, alpha = 0) +
+  geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0), col = &quot;black&quot;) +
+  facet_wrap(~player_name)</code></pre>
+<p><img src="figure/countloc_platedisc.Rmd/fc_details-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Voit almost always takes on 3-2, while Baez chases a lot of bad pitches. As a result, Voit gains an expected 71 points of wOBA, while Baez loses a whopping 122. (I emphasize that this is only for PAs that reach full count: it does not subtract 122 points from Baez’s total wOBA, but rather, since only around 11% of his PAs reach full count, the overall penalty is 14 points.)</p>
+</div>
+<div id="appendix-pitch-selection" class="section level2">
+<h2>Appendix: Pitch selection</h2>
+<p>Incidentally, the estimates of average swinging behavior allow us to say something about where a pitcher should locate a pitch when facing an average hitter. In the plots below, the red areas are favorable for the pitcher, while the green areas give an advantage to the hitter. The upshot: it’s best to pitch over the middle of the plate until there’s one strike; with more strikes, the pitcher can start to locate pitches at the edges of the strike zone; in any case, though, it’s a very bad idea to pitch off of the plate when there are three balls. Even at 3-2, a pitcher should prefer the middle of the strike zone to a pitch off of the plate.</p>
+<p>(Of course, these recommendations can be improved when the hitter’s specific preferences are known. I plan to tackle this problem in a future analysis.)</p>
+<pre class="r"><code>plot_df &lt;- all_pitches %&gt;%
+  group_by(balls, strikes, plate_x, plate_z) %&gt;%
+  summarize(avg_wOBA_chg = mean(avg_wOBA_chg)) %&gt;%
+  ungroup() %&gt;%
+  mutate(count = paste(balls, strikes, sep = &quot;-&quot;))
+
+ggplot(plot_df, aes(x = plate_x, y = plate_z, fill = avg_wOBA_chg)) +
+  geom_tile() +
+  scale_fill_gradient2(low = &quot;red&quot;, high = &quot;green&quot;) +
+  geom_rect(aes(xmin = sz_left, xmax = sz_right, ymin = sz_bot, ymax = sz_top),
+                col = &quot;black&quot;, linetype = &quot;dashed&quot;, alpha = 0) +
+  geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0)) +
+  facet_wrap(~count, nrow = 4, ncol = 3)</code></pre>
+<p><img src="figure/countloc_platedisc.Rmd/pitch_rec-1.png" width="672" style="display: block; margin: auto;" /></p>
+<br> <br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>#&gt; R version 3.5.3 (2019-03-11)
+#&gt; Platform: x86_64-apple-darwin15.6.0 (64-bit)
+#&gt; Running under: macOS Mojave 10.14.6
+#&gt; 
+#&gt; Matrix products: default
+#&gt; BLAS: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRblas.0.dylib
+#&gt; LAPACK: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRlapack.dylib
+#&gt; 
+#&gt; locale:
+#&gt; [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+#&gt; 
+#&gt; attached base packages:
+#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     
+#&gt; 
+#&gt; other attached packages:
+#&gt; [1] forcats_0.4.0   stringr_1.4.0   dplyr_0.8.0.1   purrr_0.3.2    
+#&gt; [5] readr_1.3.1     tidyr_0.8.3     tibble_2.1.1    ggplot2_3.2.0  
+#&gt; [9] tidyverse_1.2.1
+#&gt; 
+#&gt; loaded via a namespace (and not attached):
+#&gt;  [1] Rcpp_1.0.1       highr_0.8        cellranger_1.1.0 pillar_1.3.1    
+#&gt;  [5] compiler_3.5.3   git2r_0.25.2     workflowr_1.2.0  tools_3.5.3     
+#&gt;  [9] digest_0.6.18    lubridate_1.7.4  jsonlite_1.6     evaluate_0.13   
+#&gt; [13] nlme_3.1-137     gtable_0.3.0     lattice_0.20-38  pkgconfig_2.0.2 
+#&gt; [17] rlang_0.4.2      cli_1.1.0        rstudioapi_0.10  yaml_2.2.0      
+#&gt; [21] haven_2.1.1      xfun_0.6         withr_2.1.2      xml2_1.2.0      
+#&gt; [25] httr_1.4.0       knitr_1.22       hms_0.4.2        generics_0.0.2  
+#&gt; [29] fs_1.2.7         rprojroot_1.3-2  grid_3.5.3       tidyselect_0.2.5
+#&gt; [33] glue_1.3.1       R6_2.4.0         readxl_1.3.1     rmarkdown_1.12  
+#&gt; [37] modelr_0.1.5     magrittr_1.5     whisker_0.3-2    backports_1.1.3 
+#&gt; [41] scales_1.0.0     htmltools_0.3.6  rvest_0.3.4      assertthat_0.2.1
+#&gt; [45] colorspace_1.4-1 labeling_0.3     stringi_1.4.3    lazyeval_0.2.2  
+#&gt; [49] munsell_0.5.0    broom_0.5.1      crayon_1.3.4</code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
