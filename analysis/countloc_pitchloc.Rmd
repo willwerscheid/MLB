@@ -1,5 +1,5 @@
 ---
-title: "Swing and called strike probabilities"
+title: "Swing, called strike, and contact probabilities"
 author: "Jason Willwerscheid"
 date: "2/20/2020"
 output: html_document
@@ -9,9 +9,13 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, comment = "#>")
 ```
 
-## Strike probabilities
+I'll need three probabilities that condition on pitch location. First, I'll need the probability that an average batter will swing at a pitch, conditional on the pitch count and the location of the pitch. Second, I'll need the probability that a pitch will be called a strike, conditional on the pitch location and the batter not swinging. And finally, I'll need the probability that an average batter will make contact with a pitch, conditional on the pitch location and the batter swinging. I make the simplifying assumption that the latter two probabilities are independent of the pitch count. This is not actually true: umpires are more reluctant to call strike three than strikes one and two, and hitters can afford to be choosier when the count is in their favor. It'd be a good idea to revisit this analysis in the future to see how things change when everything is conditioned on pitch count.
 
-To calculate the value of swinging at a pitch, I need to know whether pitches that are swung at would have been called strikes if they weren't swung on. It's not as simple as looking at whether or not a pitch is in the strike zone: pitches at the corners are much less likely to be called strikes than pitches over the middle of the plate. Thus I assign to each pitch a probability that it will be called a strike, conditional on its location. I use empirical proportions, and I compare results with the [theoretical strike zone](https://www.baseballprospectus.com/news/article/37347/robo-strike-zone-not-simple-think/).
+## Called strike probabilities
+
+I start by calculating
+$$ p(\text{strike} \mid \text{pitch location, no swing}) $$
+Note that it's not as simple as looking at whether or not a pitch is located in the strike zone: pitches at the corners are much less likely to be called strikes than pitches over the middle of the plate. Thus I estimate probabilities using empirical proportions. In the plot below, the dashed line indicates the [theoretical strike zone](https://www.baseballprospectus.com/news/article/37347/robo-strike-zone-not-simple-think/).
 
 ```{r looks}
 suppressMessages(library(tidyverse))
@@ -41,26 +45,78 @@ ggplot(looks, aes(x = plate_x, y = plate_z, fill = p_strike)) +
 
 ## Contact probabilities
 
-I'd also like to condition the probability of a batter making contact on the pitch location. I make allowances for differences in left- and right-handed players.
+Next I calculate
+$$ p(\text{contact} \mid \text{pitch location, swing}) $$
+Recall that I flipped the $x$-axis for left-handed hitters, so there's no need to condition on handedness. The empirical probabilities appear as follows:
 
-```{r swings}
-swings <- all_pitches %>%
-  group_by(plate_x, plate_z, stand) %>%
+```{r contact}
+contact <- all_pitches %>%
+  group_by(plate_x, plate_z) %>%
   summarize(n = sum(swing == 1), 
             p_contact = ifelse(sum(swing == 1) == 0, 0, 
                                sum(contact == 1) / sum(swing == 1))) %>%
   ungroup() 
 
-ggplot(swings, aes(x = plate_x, y = plate_z, fill = p_contact)) + 
+ggplot(contact, aes(x = plate_x, y = plate_z, fill = p_contact)) + 
   geom_tile() +
   scale_fill_gradient(low = "white", high = "blue") +
-  facet_wrap(~stand) +
+  geom_rect(aes(xmin = sz_left, xmax = sz_right, ymin = sz_bot, ymax = sz_top),
+                col = "black", linetype = "dashed", alpha = 0) +
+  geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0))
+```
+
+These probabilities are a bit noisy for pitches that are high and outside (some of these bins have as few as 20 to 30 observations). A very small amount of smoothing goes a long way (I essentially force each bin to use at least 100 observations, borrowing observations from nearby bins when necessary):
+
+```{r smooth_contact}
+# knn smoothing
+smooth_probs <- function(x, y, n, p, k) {
+  dist_mat <- outer(x, x, `-`)^2 + outer(y, y, `-`)^2
+  smoothed_probs <- apply(dist_mat, 1, function(x) {
+    dist_order <- order(x)
+    obs_cumsum <- cumsum(n[dist_order])
+    n_bins <- min(which(obs_cumsum >= k))
+    dist_order <- dist_order[1:n_bins]
+    return(sum(n[dist_order] * p[dist_order]) / sum(n[dist_order]))
+  })
+  return(smoothed_probs)
+}
+
+smooth_contact <- contact %>%
+  mutate(p_contact = smooth_probs(plate_x, plate_z, n, p_contact, k = 100))
+
+ggplot(smooth_contact, aes(x = plate_x, y = plate_z, fill = p_contact)) + 
+  geom_tile() +
+  scale_fill_gradient(low = "white", high = "blue") +
+  geom_rect(aes(xmin = sz_left, xmax = sz_right, ymin = sz_bot, ymax = sz_top),
+                col = "black", linetype = "dashed", alpha = 0) +
+  geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0))
+```
+
+## Swing probabilites
+
+Finally I calculate
+$$ p(\text{swing} \mid \text{count, pitch location}) $$
+I again do a small amount of smoothing. Few plate appearances go to 3-0, so those probabilites appear noisy even after smoothing, but I prefer to leave the estimates as they are: oversmoothing yields estimates that are too high at the margins (and thus systematically biased rather than merely noisy).
+
+```{r swings}
+swings <- all_pitches %>%
+  group_by(balls, strikes, plate_x, plate_z) %>%
+  summarize(n = n(), p_swing = sum(swing) / n()) %>%
+  group_by(balls, strikes) %>%
+  mutate(p_swing = smooth_probs(plate_x, plate_z, n, p_swing, k = 100)) %>%
+  ungroup()
+
+ggplot(swings %>% mutate(pitch_count = paste(balls, strikes, sep = "-")), 
+       aes(x = plate_x, y = plate_z, fill = p_swing)) +
+  geom_tile() +
+  scale_fill_gradient(low = "white", high = "blue") +
+  facet_wrap(~pitch_count, nrow = 4, ncol = 3) +
   geom_rect(aes(xmin = sz_left, xmax = sz_right, ymin = sz_bot, ymax = sz_top),
                 col = "black", linetype = "dashed", alpha = 0) +
   geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0))
 ```
 
 ```{r save_res}
-saveRDS(looks, "pitchloc_looks.rds")
-saveRDS(swings, "pitchloc_swings.rds")
+pitchloc_res <- list(looks = looks, contact = contact, swings = swings)
+saveRDS(pitchloc_res, "output/pitchloc_res.rds")
 ```
