@@ -176,13 +176,13 @@ paste0(round(100 * (prev_nrow - nrow(all_pitches)) / prev_nrow, 1),
 
 Finally, I refactor some variables, remove others, and save the results to file.
 
-```{r save_data, eval = FALSE}
+```{r save_data}
 all_pitches <- all_pitches %>%
   mutate(swing = 1L - (description %in% c("ball", "blocked_ball", "called_strike")),
          contact = 1L * (description == "foul" | str_starts(description, "hit_into_play")),
          foul = 1L * (description %in% c("foul", "foul_pitchout")),
          called_strike = 1L * (description == "called_strike")) %>%
-  select(PA_ID, pa_woba_value, pa_woba_denom, game_year, player_name, stand, balls, strikes, 
+  select(PA_ID, pa_woba_value, pa_woba_denom, game_year, player_name, balls, strikes, 
          plate_x, plate_z, swing, contact, foul, called_strike, woba_value, woba_denom)
 
 saveRDS(all_pitches, "output/mlb_preproc.rds")
