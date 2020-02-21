@@ -82,7 +82,8 @@ smooth_probs <- function(x, y, n, p, k) {
 }
 
 smooth_contact <- contact %>%
-  mutate(p_contact = smooth_probs(plate_x, plate_z, n, p_contact, k = 100))
+  mutate(p_contact = smooth_probs(plate_x, plate_z, n, p_contact, k = 100)) %>%
+  select(-n)
 
 ggplot(smooth_contact, aes(x = plate_x, y = plate_z, fill = p_contact)) + 
   geom_tile() +
@@ -105,7 +106,8 @@ fouls <- all_pitches %>%
   group_by(plate_x, plate_z) %>%
   summarize(n = n(), p_foul = sum(foul) / n()) %>%
   ungroup() %>%
-  mutate(p_foul = smooth_probs(plate_x, plate_z, n, p_foul, k = 100))
+  mutate(p_foul = smooth_probs(plate_x, plate_z, n, p_foul, k = 100)) %>%
+  select(-n)
 
 ggplot(fouls, aes(x = plate_x, y = plate_z, fill = p_foul)) + 
   geom_tile() +
@@ -127,7 +129,8 @@ swings <- all_pitches %>%
   summarize(n = n(), p_swing = sum(swing) / n()) %>%
   group_by(balls, strikes) %>%
   mutate(p_swing = smooth_probs(plate_x, plate_z, n, p_swing, k = 100)) %>%
-  ungroup()
+  ungroup() %>%
+  select(-n)
 
 ggplot(swings %>% mutate(pitch_count = paste(balls, strikes, sep = "-")), 
        aes(x = plate_x, y = plate_z, fill = p_swing)) +
@@ -140,6 +143,6 @@ ggplot(swings %>% mutate(pitch_count = paste(balls, strikes, sep = "-")),
 ```
 
 ```{r save_res}
-pitchloc_res <- list(looks = looks, contact = contact, fouls = fouls, swings = swings)
+pitchloc_res <- list(looks = looks, contact = smooth_contact, fouls = fouls, swings = swings)
 saveRDS(pitchloc_res, "output/pitchloc_res.rds")
 ```
