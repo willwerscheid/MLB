@@ -12,7 +12,7 @@
 <meta name="author" content="Jason Willwerscheid" />
 
 
-<title>Count-specific wOBA values</title>
+<title>Ball, strike, foul, and hit-into-play values</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -411,7 +411,7 @@ div.section {
 
 
 
-<h1 class="title toc-ignore">Count-specific wOBA values</h1>
+<h1 class="title toc-ignore">Ball, strike, foul, and hit-into-play values</h1>
 <h4 class="author">Jason Willwerscheid</h4>
 <h4 class="date">2/20/2020</h4>
 
@@ -438,7 +438,7 @@ div.section {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2020-02-20
+<strong>Last updated:</strong> 2020-02-22
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -517,10 +517,10 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtree028cdac9394a8db7ea7ad9b0a84fc6fc17379673targetblank028cdaca"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/MLB/tree/028cdac9394a8db7ea7ad9b0a84fc6fc17379673" target="_blank">028cdac</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtree10c5f5b8cafb8c30ffe38c435d93543d57ede74btargetblank10c5f5ba"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/MLB/tree/10c5f5b8cafb8c30ffe38c435d93543d57ede74b" target="_blank">10c5f5b</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtree028cdac9394a8db7ea7ad9b0a84fc6fc17379673targetblank028cdaca" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtree10c5f5b8cafb8c30ffe38c435d93543d57ede74btargetblank10c5f5ba" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -536,7 +536,6 @@ Ignored files:
 
 Untracked files:
     Untracked:  .DS_Store
-    Untracked:  analysis/countloc_platedisc.Rmd
     Untracked:  code/BBrates.R
     Untracked:  code/park_factors.R
     Untracked:  code/xBB.R
@@ -557,12 +556,13 @@ Untracked files:
     Untracked:  data/standard2018NP.csv
     Untracked:  data/standard2019.csv
     Untracked:  data/standard2019NP.csv
-    Untracked:  output/count_woba.rds
+    Untracked:  output/mlb_eventvals.rds
     Untracked:  output/mlb_preproc.rds
-    Untracked:  output/pitchloc_res.rds
+    Untracked:  output/mlb_wprobs.rds
 
 Unstaged changes:
     Modified:   .gitignore
+    Deleted:    output/README.md
 
 </code></pre>
 <p>
@@ -601,6 +601,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/willwerscheid/MLB/blob/10c5f5b8cafb8c30ffe38c435d93543d57ede74b/analysis/countloc_woba.Rmd" target="_blank">10c5f5b</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-02-22
+</td>
+<td>
+wflow_publish(“analysis/countloc_woba.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/MLB/82c80582db5b0eb2c8e9792c18d4dc9f3b7d6a3b/docs/countloc_woba.html" target="_blank">82c8058</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-02-20
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -744,45 +778,14 @@ wflow_publish(“analysis/countloc_woba.Rmd”)
 </div>
 </div>
 </div>
-<div id="wobacon" class="section level2">
-<h2>wOBACON</h2>
-<p>To account for the juicier balls of 2017 and 2019, I calculate wOBACON (the expected wOBA conditional on the ball being put into play) on a per-year basis:</p>
-<pre class="r"><code>suppressMessages(library(tidyverse))
-
-all_pitches &lt;- readRDS(&quot;output/mlb_preproc.rds&quot;)
-
-wobacon &lt;- all_pitches %&gt;%
-  filter(contact == 1 &amp; foul == 0) %&gt;%
-  group_by(game_year) %&gt;%
-  summarize(wOBACON = sum(woba_value) / sum(woba_denom))
-knitr::kable(wobacon, digits = 3)</code></pre>
-<table>
-<thead>
-<tr class="header">
-<th align="right">game_year</th>
-<th align="right">wOBACON</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="right">2017</td>
-<td align="right">0.395</td>
-</tr>
-<tr class="even">
-<td align="right">2018</td>
-<td align="right">0.384</td>
-</tr>
-<tr class="odd">
-<td align="right">2019</td>
-<td align="right">0.403</td>
-</tr>
-</tbody>
-</table>
-</div>
 <div id="count-specific-woba" class="section level2">
 <h2>Count-specific wOBA</h2>
-<p>I also calculate expected wOBA conditional on the pitch count (the idea is described in Tango, Lichtman, and Dolphin). I want these on a per-year basis as well, but for less frequent pitch counts like 3-0, the standard errors associated with the empirical means are a bit too large for my taste. Thus I make the additional assumption that year-to-year differences are constant across pitch counts. (I could have also assumed that the ratios are constant, but differences are easier to interpret.) I give the complete table below: one can verify that the fitted wOBA values are all very reasonable given the empirical wOBAs and SEs, and they have the convenient property that 2017 values are all one point higher than 2019 values, which are in turn 8 points higher than 2018 values.</p>
-<pre class="r"><code>count_woba &lt;- all_pitches %&gt;%
+<p>I calculate expected wOBA conditional on the pitch count (the idea is described in Tango, Lichtman, and Dolphin). To account for the juicier balls of 2017 and 2019, I want these on a per-year basis, but for less frequent pitch counts like 3-0, the standard errors associated with the empirical means are a bit too large for my taste. Thus I make the additional assumption that year-to-year differences are constant across pitch counts. (I could have also assumed that the ratios are constant, but differences are easier to interpret.) I give the complete table below: one can verify that the fitted wOBA values are all very reasonable given the empirical wOBAs and SEs, and they have the convenient property that 2017 values are all one point higher than 2019 values, which are in turn 8 points higher than 2018 values.</p>
+<pre class="r"><code>suppressMessages(library(tidyverse))
+
+all_pitches &lt;- readRDS(&quot;output/mlb_wprobs.rds&quot;)
+
+count_woba &lt;- all_pitches %&gt;%
   group_by(game_year, balls, strikes) %&gt;%
   summarize(empirical_wOBA = sum(pa_woba_value) / sum(pa_woba_denom),
             empirical_SE = sd(pa_woba_value[pa_woba_denom &gt; 0]) / sqrt(sum(pa_woba_denom))) %&gt;%
@@ -816,7 +819,7 @@ knitr::kable(count_woba, digits = 3)  </code></pre>
 <td align="right">0</td>
 <td align="right">0.336</td>
 <td align="right">0.001</td>
-<td align="right">0.336</td>
+<td align="right">0.335</td>
 <td align="right">0.000</td>
 </tr>
 <tr class="even">
@@ -924,7 +927,7 @@ knitr::kable(count_woba, digits = 3)  </code></pre>
 <td align="right">1</td>
 <td align="right">0.318</td>
 <td align="right">0.002</td>
-<td align="right">0.316</td>
+<td align="right">0.315</td>
 <td align="right">-0.002</td>
 </tr>
 <tr class="even">
@@ -951,7 +954,7 @@ knitr::kable(count_woba, digits = 3)  </code></pre>
 <td align="right">2</td>
 <td align="right">0.233</td>
 <td align="right">0.002</td>
-<td align="right">0.237</td>
+<td align="right">0.236</td>
 <td align="right">0.004</td>
 </tr>
 <tr class="odd">
@@ -979,7 +982,7 @@ knitr::kable(count_woba, digits = 3)  </code></pre>
 <td align="right">0.445</td>
 <td align="right">0.003</td>
 <td align="right">0.444</td>
-<td align="right">0.000</td>
+<td align="right">-0.001</td>
 </tr>
 <tr class="even">
 <td align="right">2018</td>
@@ -1095,14 +1098,14 @@ knitr::kable(count_woba, digits = 3)  </code></pre>
 <td align="right">1</td>
 <td align="right">0.478</td>
 <td align="right">0.004</td>
-<td align="right">0.478</td>
+<td align="right">0.477</td>
 <td align="right">-0.001</td>
 </tr>
 <tr class="odd">
 <td align="right">2019</td>
 <td align="right">3</td>
 <td align="right">1</td>
-<td align="right">0.487</td>
+<td align="right">0.486</td>
 <td align="right">0.004</td>
 <td align="right">0.485</td>
 <td align="right">-0.001</td>
@@ -1129,7 +1132,7 @@ knitr::kable(count_woba, digits = 3)  </code></pre>
 <td align="right">2019</td>
 <td align="right">3</td>
 <td align="right">2</td>
-<td align="right">0.384</td>
+<td align="right">0.383</td>
 <td align="right">0.003</td>
 <td align="right">0.386</td>
 <td align="right">0.002</td>
@@ -1139,8 +1142,40 @@ knitr::kable(count_woba, digits = 3)  </code></pre>
 </div>
 <div id="woba-values-for-pitch-events" class="section level2">
 <h2>wOBA values for pitch events</h2>
-<p>Finally, I calculate the value of a ball, strike, foul ball, and hit into play conditional on the pitch count.</p>
-<p>For example, let the count be 0-2, which in 2019 is associated with an expected wOBA of 0.213. A ball will bring the count to 1-2, which has a wOBA of 0.234, so the value of a ball at 0-2 is 0.021. (And, due to the convenient assumption I made above, this value is constant from year to year.) A strike will result in a strikeout, which brings the wOBA down to zero: thus the value of a strike at 0-2 is -0.213. A foul ball does not change the count, so its value is zero. Finally, putting the ball into play brings the wOBA up to 0.404 (the wOBACON for 2019), so its value is 0.191. The complete table is below.</p>
+<p>Next, using the wOBACON calculated <a href="countloc_pitchloc.html">here</a>, I calculate the value of a ball, strike, foul ball, and hit into play conditional on the pitch count (and also conditional on pitch type and location, since the wOBACON depends on these features).</p>
+<p>For example, consider the following pitch:</p>
+<pre class="r"><code>set.seed(60666)
+ex &lt;- all_pitches %&gt;%
+  select(game_year:plate_z, wOBACON) %&gt;%
+  sample_n(1)
+knitr::kable(ex, digits = 3)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="right">game_year</th>
+<th align="left">player_name</th>
+<th align="right">balls</th>
+<th align="right">strikes</th>
+<th align="left">pitch_type</th>
+<th align="right">plate_x</th>
+<th align="right">plate_z</th>
+<th align="right">wOBACON</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">2018</td>
+<td align="left">Trey Mancini</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="left">FF</td>
+<td align="right">1</td>
+<td align="right">3.8</td>
+<td align="right">0.377</td>
+</tr>
+</tbody>
+</table>
+<p>In 2018, an 0-2 count is associated with an expected wOBA of 0.205. A ball will bring the count to 1-2, which has a wOBA of 0.228, so the value of a ball at 0-2 is 0.023. (And, due to the convenient assumption I made above, this value is constant from year to year.) A strike will result in a strikeout, which brings the wOBA down to zero: thus the value of a strike at 0-2 is -0.205. A foul ball does not change the count, so its value is zero. Finally, since the pitch is a four-seamer outside, it has a relatively modest conditional wOBACON of 0.377, which yields a hit-into-play value of 0.172.</p>
 <pre class="r"><code>event_vals &lt;- count_woba %&gt;%
   rename(wOBA = fitted_wOBA) %&gt;%
   select(game_year, balls, strikes, wOBA)
@@ -1167,420 +1202,11 @@ event_vals &lt;- event_vals %&gt;%
 event_vals &lt;- event_vals %&gt;%
   mutate(foul_value = ifelse(strikes == 2, 0, strike_value))
 
-# Hit into play:
-event_vals &lt;- event_vals %&gt;%
-  left_join(wobacon, by = &quot;game_year&quot;) %&gt;%
-  mutate(HIP_value = wOBACON - wOBA)
-
-event_vals &lt;- event_vals %&gt;%
-  select(-wOBA, -wOBACON) %&gt;%
-  arrange(balls, strikes, game_year)
-
-knitr::kable(event_vals, digits = 3)</code></pre>
-<table>
-<thead>
-<tr class="header">
-<th align="right">game_year</th>
-<th align="right">balls</th>
-<th align="right">strikes</th>
-<th align="right">ball_value</th>
-<th align="right">strike_value</th>
-<th align="right">foul_value</th>
-<th align="right">HIP_value</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="right">2017</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0.041</td>
-<td align="right">-0.051</td>
-<td align="right">-0.051</td>
-<td align="right">0.059</td>
-</tr>
-<tr class="even">
-<td align="right">2018</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0.041</td>
-<td align="right">-0.051</td>
-<td align="right">-0.051</td>
-<td align="right">0.057</td>
-</tr>
-<tr class="odd">
-<td align="right">2019</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0.041</td>
-<td align="right">-0.051</td>
-<td align="right">-0.051</td>
-<td align="right">0.068</td>
-</tr>
-<tr class="even">
-<td align="right">2017</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0.031</td>
-<td align="right">-0.072</td>
-<td align="right">-0.072</td>
-<td align="right">0.110</td>
-</tr>
-<tr class="odd">
-<td align="right">2018</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0.031</td>
-<td align="right">-0.072</td>
-<td align="right">-0.072</td>
-<td align="right">0.108</td>
-</tr>
-<tr class="even">
-<td align="right">2019</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0.031</td>
-<td align="right">-0.072</td>
-<td align="right">-0.072</td>
-<td align="right">0.119</td>
-</tr>
-<tr class="odd">
-<td align="right">2017</td>
-<td align="right">0</td>
-<td align="right">2</td>
-<td align="right">0.023</td>
-<td align="right">-0.213</td>
-<td align="right">0.000</td>
-<td align="right">0.181</td>
-</tr>
-<tr class="even">
-<td align="right">2018</td>
-<td align="right">0</td>
-<td align="right">2</td>
-<td align="right">0.023</td>
-<td align="right">-0.205</td>
-<td align="right">0.000</td>
-<td align="right">0.179</td>
-</tr>
-<tr class="odd">
-<td align="right">2019</td>
-<td align="right">0</td>
-<td align="right">2</td>
-<td align="right">0.023</td>
-<td align="right">-0.213</td>
-<td align="right">0.000</td>
-<td align="right">0.190</td>
-</tr>
-<tr class="even">
-<td align="right">2017</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0.067</td>
-<td align="right">-0.061</td>
-<td align="right">-0.061</td>
-<td align="right">0.018</td>
-</tr>
-<tr class="odd">
-<td align="right">2018</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0.067</td>
-<td align="right">-0.061</td>
-<td align="right">-0.061</td>
-<td align="right">0.016</td>
-</tr>
-<tr class="even">
-<td align="right">2019</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0.067</td>
-<td align="right">-0.061</td>
-<td align="right">-0.061</td>
-<td align="right">0.027</td>
-</tr>
-<tr class="odd">
-<td align="right">2017</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0.058</td>
-<td align="right">-0.079</td>
-<td align="right">-0.079</td>
-<td align="right">0.079</td>
-</tr>
-<tr class="even">
-<td align="right">2018</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0.058</td>
-<td align="right">-0.079</td>
-<td align="right">-0.079</td>
-<td align="right">0.077</td>
-</tr>
-<tr class="odd">
-<td align="right">2019</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0.058</td>
-<td align="right">-0.079</td>
-<td align="right">-0.079</td>
-<td align="right">0.088</td>
-</tr>
-<tr class="even">
-<td align="right">2017</td>
-<td align="right">1</td>
-<td align="right">2</td>
-<td align="right">0.048</td>
-<td align="right">-0.237</td>
-<td align="right">0.000</td>
-<td align="right">0.158</td>
-</tr>
-<tr class="odd">
-<td align="right">2018</td>
-<td align="right">1</td>
-<td align="right">2</td>
-<td align="right">0.048</td>
-<td align="right">-0.228</td>
-<td align="right">0.000</td>
-<td align="right">0.156</td>
-</tr>
-<tr class="even">
-<td align="right">2019</td>
-<td align="right">1</td>
-<td align="right">2</td>
-<td align="right">0.048</td>
-<td align="right">-0.236</td>
-<td align="right">0.000</td>
-<td align="right">0.167</td>
-</tr>
-<tr class="odd">
-<td align="right">2017</td>
-<td align="right">2</td>
-<td align="right">0</td>
-<td align="right">0.113</td>
-<td align="right">-0.071</td>
-<td align="right">-0.071</td>
-<td align="right">-0.050</td>
-</tr>
-<tr class="even">
-<td align="right">2018</td>
-<td align="right">2</td>
-<td align="right">0</td>
-<td align="right">0.113</td>
-<td align="right">-0.071</td>
-<td align="right">-0.071</td>
-<td align="right">-0.052</td>
-</tr>
-<tr class="odd">
-<td align="right">2019</td>
-<td align="right">2</td>
-<td align="right">0</td>
-<td align="right">0.113</td>
-<td align="right">-0.071</td>
-<td align="right">-0.071</td>
-<td align="right">-0.041</td>
-</tr>
-<tr class="even">
-<td align="right">2017</td>
-<td align="right">2</td>
-<td align="right">1</td>
-<td align="right">0.112</td>
-<td align="right">-0.089</td>
-<td align="right">-0.089</td>
-<td align="right">0.021</td>
-</tr>
-<tr class="odd">
-<td align="right">2018</td>
-<td align="right">2</td>
-<td align="right">1</td>
-<td align="right">0.112</td>
-<td align="right">-0.089</td>
-<td align="right">-0.089</td>
-<td align="right">0.019</td>
-</tr>
-<tr class="even">
-<td align="right">2019</td>
-<td align="right">2</td>
-<td align="right">1</td>
-<td align="right">0.112</td>
-<td align="right">-0.089</td>
-<td align="right">-0.089</td>
-<td align="right">0.030</td>
-</tr>
-<tr class="odd">
-<td align="right">2017</td>
-<td align="right">2</td>
-<td align="right">2</td>
-<td align="right">0.102</td>
-<td align="right">-0.284</td>
-<td align="right">0.000</td>
-<td align="right">0.111</td>
-</tr>
-<tr class="even">
-<td align="right">2018</td>
-<td align="right">2</td>
-<td align="right">2</td>
-<td align="right">0.102</td>
-<td align="right">-0.276</td>
-<td align="right">0.000</td>
-<td align="right">0.109</td>
-</tr>
-<tr class="odd">
-<td align="right">2019</td>
-<td align="right">2</td>
-<td align="right">2</td>
-<td align="right">0.102</td>
-<td align="right">-0.284</td>
-<td align="right">0.000</td>
-<td align="right">0.120</td>
-</tr>
-<tr class="even">
-<td align="right">2017</td>
-<td align="right">3</td>
-<td align="right">0</td>
-<td align="right">0.443</td>
-<td align="right">-0.071</td>
-<td align="right">-0.071</td>
-<td align="right">-0.163</td>
-</tr>
-<tr class="odd">
-<td align="right">2018</td>
-<td align="right">3</td>
-<td align="right">0</td>
-<td align="right">0.451</td>
-<td align="right">-0.071</td>
-<td align="right">-0.071</td>
-<td align="right">-0.165</td>
-</tr>
-<tr class="even">
-<td align="right">2019</td>
-<td align="right">3</td>
-<td align="right">0</td>
-<td align="right">0.443</td>
-<td align="right">-0.071</td>
-<td align="right">-0.071</td>
-<td align="right">-0.154</td>
-</tr>
-<tr class="odd">
-<td align="right">2017</td>
-<td align="right">3</td>
-<td align="right">1</td>
-<td align="right">0.514</td>
-<td align="right">-0.099</td>
-<td align="right">-0.099</td>
-<td align="right">-0.091</td>
-</tr>
-<tr class="even">
-<td align="right">2018</td>
-<td align="right">3</td>
-<td align="right">1</td>
-<td align="right">0.522</td>
-<td align="right">-0.099</td>
-<td align="right">-0.099</td>
-<td align="right">-0.093</td>
-</tr>
-<tr class="odd">
-<td align="right">2019</td>
-<td align="right">3</td>
-<td align="right">1</td>
-<td align="right">0.515</td>
-<td align="right">-0.099</td>
-<td align="right">-0.099</td>
-<td align="right">-0.082</td>
-</tr>
-<tr class="even">
-<td align="right">2017</td>
-<td align="right">3</td>
-<td align="right">2</td>
-<td align="right">0.614</td>
-<td align="right">-0.386</td>
-<td align="right">0.000</td>
-<td align="right">0.008</td>
-</tr>
-<tr class="odd">
-<td align="right">2018</td>
-<td align="right">3</td>
-<td align="right">2</td>
-<td align="right">0.622</td>
-<td align="right">-0.378</td>
-<td align="right">0.000</td>
-<td align="right">0.006</td>
-</tr>
-<tr class="even">
-<td align="right">2019</td>
-<td align="right">3</td>
-<td align="right">2</td>
-<td align="right">0.614</td>
-<td align="right">-0.386</td>
-<td align="right">0.000</td>
-<td align="right">0.017</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div id="visualizations-of-2019-values" class="section level2">
-<h2>Visualizations of 2019 values</h2>
-<p>I prefer visualizations to tables, so I include a visualization of event values for 2019. Results are more or less as expected: a strike is much more valuable when it’s the third strike (and especially so at 3-2); a ball is more valuable when it’s the fourth ball (and again, especially so at 3-2); and putting the ball into play is more valuable when it’s a pitcher’s count. Interestingly, a batter is better off taking a strike at 3-0 than putting the ball into play. The implication is that an average hitter should <em>never</em> swing at a 3-0 pitch.</p>
-<pre class="r"><code>plot_df &lt;- event_vals %&gt;%
-  filter(game_year == 2019) %&gt;%
-  gather(key = &quot;event&quot;, value = &quot;value&quot;, -game_year, -balls, -strikes) %&gt;%
-  mutate(event = str_remove(event, &quot;_value&quot;))
-
-ggplot(plot_df, 
-       aes(x = strikes, y = balls, fill = value)) +
-  geom_tile() +
-  theme_minimal() +
-  scale_fill_gradient2(low = &quot;red&quot;, high = &quot;green&quot;) +
-  facet_wrap(~event, nrow = 2, ncol = 2)</code></pre>
-<p><img src="figure/countloc_woba.Rmd/viz-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-viz-1">
-Past versions of viz-1.png
-</button>
-</p>
-<div id="fig-viz-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/willwerscheid/MLB/blob/912498524a97cf08569647ed250630e14669b99e/docs/figure/countloc_woba.Rmd/viz-1.png" target="_blank">9124985</a>
-</td>
-<td>
-Jason Willwerscheid
-</td>
-<td>
-2020-02-20
-</td>
-</tr>
-<tr>
-<td>
-<a href="https://github.com/willwerscheid/MLB/blob/8b9edbe93c0d6c87895eb5d4e37968436daa5df1/docs/figure/countloc_woba.Rmd/viz-1.png" target="_blank">8b9edbe</a>
-</td>
-<td>
-Jason Willwerscheid
-</td>
-<td>
-2020-02-20
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<pre class="r"><code>saveRDS(event_vals, &quot;output/event_vals.rds&quot;)</code></pre>
+all_pitches &lt;- all_pitches %&gt;%
+  left_join(event_vals, by = c(&quot;game_year&quot;, &quot;balls&quot;, &quot;strikes&quot;)) %&gt;%
+  mutate(HIP_value = wOBACON - wOBA) %&gt;%
+  select(-wOBA)</code></pre>
+<pre class="r"><code>saveRDS(all_pitches, &quot;output/mlb_eventvals.rds&quot;)</code></pre>
 <br> <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
@@ -1620,8 +1246,8 @@ Jason Willwerscheid
 #&gt; [33] glue_1.3.1       R6_2.4.0         readxl_1.3.1     rmarkdown_1.12  
 #&gt; [37] modelr_0.1.5     magrittr_1.5     whisker_0.3-2    backports_1.1.3 
 #&gt; [41] scales_1.0.0     htmltools_0.3.6  rvest_0.3.4      assertthat_0.2.1
-#&gt; [45] colorspace_1.4-1 labeling_0.3     stringi_1.4.3    lazyeval_0.2.2  
-#&gt; [49] munsell_0.5.0    broom_0.5.1      crayon_1.3.4</code></pre>
+#&gt; [45] colorspace_1.4-1 stringi_1.4.3    lazyeval_0.2.2   munsell_0.5.0   
+#&gt; [49] broom_0.5.1      crayon_1.3.4</code></pre>
 </div>
 </div>
 
