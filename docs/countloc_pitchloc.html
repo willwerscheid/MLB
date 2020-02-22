@@ -12,7 +12,7 @@
 <meta name="author" content="Jason Willwerscheid" />
 
 
-<title>Swing, called strike, contact, and foul probabilities</title>
+<title>wOBACON and swing, called strike, contact, and foul probabilities</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -411,7 +411,7 @@ div.section {
 
 
 
-<h1 class="title toc-ignore">Swing, called strike, contact, and foul probabilities</h1>
+<h1 class="title toc-ignore">wOBACON and swing, called strike, contact, and foul probabilities</h1>
 <h4 class="author">Jason Willwerscheid</h4>
 <h4 class="date">2/20/2020</h4>
 
@@ -438,7 +438,7 @@ div.section {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2020-02-20
+<strong>Last updated:</strong> 2020-02-22
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -517,10 +517,10 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtree36142bf9e04a3b24b0418ece242cc227a88bacfetargetblank36142bfa"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/MLB/tree/36142bf9e04a3b24b0418ece242cc227a88bacfe" target="_blank">36142bf</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtreed3de4fbe97540118038d2225e113533064b25c05targetblankd3de4fba"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/MLB/tree/d3de4fbe97540118038d2225e113533064b25c05" target="_blank">d3de4fb</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtree36142bf9e04a3b24b0418ece242cc227a88bacfetargetblank36142bfa" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtreed3de4fbe97540118038d2225e113533064b25c05targetblankd3de4fba" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -536,7 +536,6 @@ Ignored files:
 
 Untracked files:
     Untracked:  .DS_Store
-    Untracked:  analysis/countloc_platedisc.Rmd
     Untracked:  code/BBrates.R
     Untracked:  code/park_factors.R
     Untracked:  code/xBB.R
@@ -559,6 +558,7 @@ Untracked files:
     Untracked:  data/standard2019NP.csv
     Untracked:  output/event_vals.rds
     Untracked:  output/mlb_preproc.rds
+    Untracked:  output/mlb_wprobs.rds
     Untracked:  output/pitchloc_res.rds
 
 Unstaged changes:
@@ -602,6 +602,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/willwerscheid/MLB/blob/d3de4fbe97540118038d2225e113533064b25c05/analysis/countloc_pitchloc.Rmd" target="_blank">d3de4fb</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-02-22
+</td>
+<td>
+wflow_publish(“analysis/countloc_pitchloc.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/MLB/903556d7372103effce322cb6139775351f2a1dc/docs/countloc_pitchloc.html" target="_blank">903556d</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-02-20
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 html
@@ -711,10 +745,19 @@ wflow_publish(“analysis/countloc_pitchloc.Rmd”)
 </div>
 </div>
 </div>
-<p>I’ll need four probabilities that condition on pitch location. First, I’ll need the probability that an average batter will swing at a pitch, conditional on the pitch count and the location of the pitch. Second, I’ll need the probability that a pitch will be called a strike, conditional on the pitch location and the batter not swinging. Third, I’ll need the probability that an average batter will make contact with a pitch, conditional on the pitch location and the batter swinging. And finally, I’ll need the probability that the ball will be hit foul, conditional on the pitch location and the batter making contact. I make the simplifying assumption that the latter three probabilities are independent of the pitch count. This is not actually true: for example, umpires are more reluctant to call strike three than strikes one and two, and hitters can afford to be choosier when the count is in their favor. It’d be a good idea to revisit this analysis in the future to see how things change when everything is conditioned on pitch count.</p>
+<p>My basic strategy is to condition my wOBACON and all of my probabilities on pitch location and, when it makes sense, pitch count and pitch type.</p>
+<p>I need four probabilities:</p>
+<ul>
+<li>The probability that a pitch will be called a strike, given that the batter doesn’t swing.</li>
+<li>The probability that an average batter will make contact with a pitch, given that the batter does swing.</li>
+<li>The probability that the ball will be hit foul, given that the batter makes contact.</li>
+<li>The probability that an average batter swings at a pitch.</li>
+</ul>
+<p>I condition swing probabilities on pitch count, but I make the simplifying assumption that the first three probabilities are independent of the pitch count. This is not strictly true: for example, umpires are more reluctant to call strike three than strikes one and two; and hitters can afford to be choosier when the count is in their favor, so that contact rates are higher for hitter’s counts.</p>
+<p>I condition foul probabilities, swing probabilites, and wOBA on pitch type. Conditioning contact probabilities on pitch type is probably the right thing to do, but doesn’t seem to make much of a difference.</p>
 <div id="called-strike-probabilities" class="section level2">
 <h2>Called strike probabilities</h2>
-<p>I start by calculating <span class="math display">\[ p(\text{strike} \mid \text{pitch location, no swing}) \]</span> Note that it’s not as simple as looking at whether or not a pitch is located in the strike zone: pitches at the corners are much less likely to be called strikes than pitches over the middle of the plate. Thus I estimate probabilities using empirical proportions. In the plot below, the dashed line indicates the <a href="https://www.baseballprospectus.com/news/article/37347/robo-strike-zone-not-simple-think/">theoretical strike zone</a>.</p>
+<p>I first calculate <span class="math display">\[ p(\text{strike} \mid \text{pitch location, no swing}) \]</span> Note that it’s not as simple as looking at whether or not a pitch is located in the strike zone: pitches at the corners are much less likely to be called strikes than pitches over the middle of the plate. Thus I estimate probabilities using empirical proportions. In the plot below, the dashed line indicates the <a href="https://www.baseballprospectus.com/news/article/37347/robo-strike-zone-not-simple-think/">theoretical strike zone</a>.</p>
 <pre class="r"><code>suppressMessages(library(tidyverse))
 
 all_pitches &lt;- readRDS(&quot;output/mlb_preproc.rds&quot;)
@@ -734,7 +777,7 @@ looks &lt;- all_pitches %&gt;%
 
 ggplot(looks, aes(x = plate_x, y = plate_z, fill = p_strike)) + 
   geom_tile() +
-  scale_fill_gradient(low = &quot;white&quot;, high = &quot;blue&quot;) +
+  scale_fill_gradient2(high = &quot;dark green&quot;) +
   geom_rect(aes(xmin = sz_left, xmax = sz_right, ymin = sz_bot, ymax = sz_top),
                 col = &quot;black&quot;, linetype = &quot;dashed&quot;, alpha = 0) +
   geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0))</code></pre>
@@ -800,7 +843,7 @@ Jason Willwerscheid
 
 ggplot(contact, aes(x = plate_x, y = plate_z, fill = p_contact)) + 
   geom_tile() +
-  scale_fill_gradient(low = &quot;white&quot;, high = &quot;blue&quot;) +
+  scale_fill_gradient2(high = &quot;dark green&quot;) +
   geom_rect(aes(xmin = sz_left, xmax = sz_right, ymin = sz_bot, ymax = sz_top),
                 col = &quot;black&quot;, linetype = &quot;dashed&quot;, alpha = 0) +
   geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0))</code></pre>
@@ -842,7 +885,7 @@ Jason Willwerscheid
 </table>
 </div>
 </div>
-<p>These probabilities are a bit noisy for pitches that are high and outside (some of these bins have as few as 20 to 30 observations). A very small amount of smoothing goes a long way (I essentially force each bin to use at least 100 observations, borrowing observations from nearby bins when necessary):</p>
+<p>These estimates are pretty noisy for pitches that are high and outside (some of these bins have as few as 20 to 30 observations). A very small amount of smoothing goes a long way (I essentially force each bin to use at least 100 observations, borrowing observations from nearby bins when necessary):</p>
 <pre class="r"><code># knn smoothing
 smooth_probs &lt;- function(x, y, n, p, k) {
   dist_mat &lt;- outer(x, x, `-`)^2 + outer(y, y, `-`)^2
@@ -862,7 +905,7 @@ smooth_contact &lt;- contact %&gt;%
 
 ggplot(smooth_contact, aes(x = plate_x, y = plate_z, fill = p_contact)) + 
   geom_tile() +
-  scale_fill_gradient(low = &quot;white&quot;, high = &quot;blue&quot;) +
+  scale_fill_gradient2(high = &quot;dark green&quot;) +
   geom_rect(aes(xmin = sz_left, xmax = sz_right, ymin = sz_bot, ymax = sz_top),
                 col = &quot;black&quot;, linetype = &quot;dashed&quot;, alpha = 0) +
   geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0))</code></pre>
@@ -904,25 +947,28 @@ Jason Willwerscheid
 </table>
 </div>
 </div>
+<p>I considered estimating different contact probabilities for different pitch types, but initial attempts to do so weren’t very promising. The probabilities turn out to be very similar across pitch types, with the notable exception that changeups induce more contact than fastballs when they’re up in the zone. However, the estimates are extremely noisy and are not terribly amenable to smoothing.</p>
 </div>
 <div id="foul-probabilities" class="section level2">
 <h2>Foul probabilities</h2>
 <p>Next up is <span class="math display">\[ p(\text{foul} \mid \text{pitch location, contact}) \]</span></p>
-<p>I again do a small amount of smoothing.</p>
+<p>Foul probabilities do seem to vary quite a bit by pitch type. Getting the smoothing right requires some tinkering:</p>
 <pre class="r"><code>fouls &lt;- all_pitches %&gt;%
   filter(contact == 1) %&gt;%
-  group_by(plate_x, plate_z) %&gt;%
+  group_by(plate_x, plate_z, pitch_type) %&gt;%
   summarize(n = n(), p_foul = sum(foul) / n()) %&gt;%
   ungroup() %&gt;%
-  mutate(p_foul = smooth_probs(plate_x, plate_z, n, p_foul, k = 100)) %&gt;%
+  group_by(pitch_type) %&gt;%
+  mutate(p_foul = smooth_probs(plate_x, plate_z, n, p_foul, k = 1000)) %&gt;%
   select(-n)
 
 ggplot(fouls, aes(x = plate_x, y = plate_z, fill = p_foul)) + 
   geom_tile() +
-  scale_fill_gradient(low = &quot;white&quot;, high = &quot;blue&quot;) +
+  scale_fill_gradient2(high = &quot;dark green&quot;) +
   geom_rect(aes(xmin = sz_left, xmax = sz_right, ymin = sz_bot, ymax = sz_top),
                 col = &quot;black&quot;, linetype = &quot;dashed&quot;, alpha = 0) +
-  geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0))</code></pre>
+  geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0)) +
+  facet_wrap(~pitch_type)</code></pre>
 <p><img src="figure/countloc_pitchloc.Rmd/fouls-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-fouls-1">
@@ -964,19 +1010,15 @@ Jason Willwerscheid
 </div>
 <div id="swing-probabilities" class="section level2">
 <h2>Swing probabilities</h2>
-<p>Finally I calculate <span class="math display">\[ p(\text{swing} \mid \text{count, pitch location}) \]</span> Few plate appearances go to 3-0, so those probabilites appear noisy even after smoothing, but I prefer to leave the estimates as they are: oversmoothing yields estimates that are too high at the margins (and thus systematically biased rather than merely noisy).</p>
-<pre class="r"><code>swings &lt;- all_pitches %&gt;%
+<p>Instead of modeling swing probabilities nonparametrically, I fit a GLM so that I can condition on both pitch type and pitch count. (Using nonparametric estimates would mean calculating <span class="math inline">\(12 * 5 = 60\)</span> sets of empirical proportions, and results would be very noisy.) An inspection of the marginal probabilites suggests that this is a reasonable approach:</p>
+<pre class="r"><code>count_df &lt;- all_pitches %&gt;%
   group_by(balls, strikes, plate_x, plate_z) %&gt;%
-  summarize(n = n(), p_swing = sum(swing) / n()) %&gt;%
-  group_by(balls, strikes) %&gt;%
-  mutate(p_swing = smooth_probs(plate_x, plate_z, n, p_swing, k = 100)) %&gt;%
-  ungroup() %&gt;%
-  select(-n)
-
-ggplot(swings %&gt;% mutate(pitch_count = paste(balls, strikes, sep = &quot;-&quot;)), 
-       aes(x = plate_x, y = plate_z, fill = p_swing)) +
+  summarize(p_swing = sum(swing) / n()) %&gt;%
+  ungroup %&gt;%
+  mutate(pitch_count = paste(balls, strikes, sep = &quot;-&quot;))
+ggplot(count_df, aes(x = plate_x, y = plate_z, fill = p_swing)) +
   geom_tile() +
-  scale_fill_gradient(low = &quot;white&quot;, high = &quot;blue&quot;) +
+  scale_fill_gradient2(high = &quot;dark green&quot;) +
   facet_wrap(~pitch_count, nrow = 4, ncol = 3) +
   geom_rect(aes(xmin = sz_left, xmax = sz_right, ymin = sz_bot, ymax = sz_top),
                 col = &quot;black&quot;, linetype = &quot;dashed&quot;, alpha = 0) +
@@ -1030,8 +1072,143 @@ Jason Willwerscheid
 </table>
 </div>
 </div>
-<pre class="r"><code>pitchloc_res &lt;- list(looks = looks, contact = smooth_contact, fouls = fouls, swings = swings)
-saveRDS(pitchloc_res, &quot;output/pitchloc_res.rds&quot;)</code></pre>
+<pre class="r"><code>ptype_df &lt;- all_pitches %&gt;%
+  group_by(pitch_type, plate_x, plate_z) %&gt;%
+  summarize(p_swing = sum(swing) / n()) %&gt;%
+  ungroup
+ggplot(ptype_df, aes(x = plate_x, y = plate_z, fill = p_swing)) +
+  geom_tile() +
+  scale_fill_gradient2(high = &quot;dark green&quot;) +
+  facet_wrap(~pitch_type, nrow = 3, ncol = 2) +
+  geom_rect(aes(xmin = sz_left, xmax = sz_right, ymin = sz_bot, ymax = sz_top),
+                col = &quot;black&quot;, linetype = &quot;dashed&quot;, alpha = 0) +
+  geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0))</code></pre>
+<p><img src="figure/countloc_pitchloc.Rmd/swings2-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>In all cases, the regions of hitter preference are roughly elliptical, so that I ought to be able to model swing probabilites using a binomial GLM with second-degree polynomial coefficients for <code>plate_x</code> and <code>plate_z</code> (as well as an interaction term). I include interactions between pitch type and pitch location, but no interactions with pitch count.</p>
+<pre class="r"><code>swing_fit &lt;- glm(swing ~ (poly(plate_x, 2) + poly(plate_z, 2) + plate_x:plate_z) * pitch_type + 
+                   factor(balls) * factor(strikes),
+                 family = &quot;binomial&quot;, data = all_pitches)</code></pre>
+<p>One can verify that the fitted probabilities closely agree with the empirical proportions plotted above. Fitted probabilities for four-seamers are as follows:</p>
+<pre class="r"><code>glm_count_df &lt;- count_df %&gt;%
+  mutate(pitch_type = &quot;FF&quot;)
+count_preds &lt;- predict(swing_fit, newdata = glm_count_df, type = &quot;response&quot;)
+glm_count_df &lt;- glm_count_df %&gt;%
+  mutate(p_swing = count_preds)
+ggplot(glm_count_df, aes(x = plate_x, y = plate_z, fill = p_swing)) +
+  geom_tile() +
+  scale_fill_gradient2(high = &quot;dark green&quot;) +
+  facet_wrap(~pitch_count, nrow = 4, ncol = 3) +
+  geom_rect(aes(xmin = sz_left, xmax = sz_right, ymin = sz_bot, ymax = sz_top),
+                col = &quot;black&quot;, linetype = &quot;dashed&quot;, alpha = 0) +
+  geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0))</code></pre>
+<p><img src="figure/countloc_pitchloc.Rmd/swings3-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>At 1-1, fitted probabilities for various pitch types are as follows:</p>
+<pre class="r"><code>glm_ptype_df &lt;- ptype_df %&gt;%
+  mutate(balls = 1, strikes = 1)
+ptype_preds &lt;- predict(swing_fit, newdata = glm_ptype_df, type = &quot;response&quot;)
+glm_ptype_df &lt;- glm_ptype_df %&gt;%
+  mutate(p_swing = ptype_preds)
+ggplot(glm_ptype_df, aes(x = plate_x, y = plate_z, fill = p_swing)) +
+  geom_tile() +
+  scale_fill_gradient2(high = &quot;dark green&quot;) +
+  facet_wrap(~pitch_type, nrow = 3, ncol = 2) +
+  geom_rect(aes(xmin = sz_left, xmax = sz_right, ymin = sz_bot, ymax = sz_top),
+                col = &quot;black&quot;, linetype = &quot;dashed&quot;, alpha = 0) +
+  geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0))</code></pre>
+<p><img src="figure/countloc_pitchloc.Rmd/swings4-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="wobacon" class="section level2">
+<h2>wOBACON</h2>
+<p>Estimating wOBACON conditional on pitch type and location is the trickiest step, especially since it’s usual to assume that it also varies by year. My approach is admittedly pretty ad hoc. First I estimate barrel probability by pitch location, independent of pitch type. Some smoothing is already necessary at this stage:</p>
+<pre class="r"><code>inplay &lt;- all_pitches %&gt;%
+  filter(contact == 1 &amp; foul == 0 &amp; pa_woba_denom &gt; 0 &amp; !is.na(barrel))
+
+barrels_by_loc &lt;- inplay %&gt;%
+  group_by(plate_x, plate_z) %&gt;%
+  summarize(n = n(), p_barrel = mean(barrel)) %&gt;%
+  ungroup() %&gt;%
+  mutate(p_barrel = smooth_probs(plate_x, plate_z, n, p_barrel, k = 1000)) %&gt;%
+  select(-n)
+
+ggplot(barrels_by_loc, aes(x = plate_x, y = plate_z, fill = p_barrel)) + 
+  geom_tile() +
+  scale_fill_gradient2(high = &quot;dark green&quot;) +
+  geom_rect(aes(xmin = sz_left, xmax = sz_right, ymin = sz_bot, ymax = sz_top),
+                col = &quot;black&quot;, linetype = &quot;dashed&quot;, alpha = 0) +
+  geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0))</code></pre>
+<p><img src="figure/countloc_pitchloc.Rmd/wobacon-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Next, I estimate odds multipliers for each pitch type. This method gives the pitch-type-specific probabilites the same general shape, so to speak, but different magnitudes:</p>
+<pre class="r"><code>barrel_data &lt;- inplay %&gt;%
+  left_join(barrels_by_loc, by = c(&quot;plate_x&quot;, &quot;plate_z&quot;)) %&gt;%
+  filter(p_barrel &gt; 0)
+
+barrel_fit &lt;- glm(barrel ~ -1 + pitch_type + 
+                    offset(log(p_barrel /(1 - p_barrel))), 
+                  family = &quot;binomial&quot;, data = barrel_data)
+round(exp(coef(barrel_fit)), digits = 2)</code></pre>
+<pre><code>#&gt; pitch_typeCH pitch_typeCU pitch_typeFF pitch_typeFT pitch_typeSL 
+#&gt;         1.02         0.83         1.17         0.84         0.93</code></pre>
+<p>Four-seamers are the easiest balls to crush: if a hitter sees one, then the odds of barreling it are 17% higher than the mean for all pitches in the same location. Curveballs and, surprisingly, two-seamers are the most difficult to get a handle on.</p>
+<p>The last step is to estimate year-to-year wOBACON separately for barreled balls and non-barreled balls:</p>
+<pre class="r"><code>wobacon &lt;- inplay %&gt;%
+  group_by(game_year, barrel) %&gt;%
+  summarize(wOBACON = mean(pa_woba_value)) %&gt;%
+  spread(key = barrel, value = wOBACON) %&gt;%
+  rename(wOBAwk = `0`, wOBAbrl = `1`)
+knitr::kable(wobacon, digits = 3)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">game_year</th>
+<th align="left">wOBAwk</th>
+<th align="left">wOBAbrl</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">2017</td>
+<td align="left">0.320</td>
+<td align="left">1.328</td>
+</tr>
+<tr class="even">
+<td align="left">2018</td>
+<td align="left">0.314</td>
+<td align="left">1.181</td>
+</tr>
+<tr class="odd">
+<td align="left">2019</td>
+<td align="left">0.318</td>
+<td align="left">1.279</td>
+</tr>
+</tbody>
+</table>
+<p>The wOBACON for each pitch can then be estimated as: <span class="math display">\[ p_{\text{barrel}} \mathbb{E}(\text{wOBACON} \mid \text{year}, \text{barrel} = 1) + (1 - p_{\text{barrel}}) \mathbb{E}(\text{wOBACON} \mid \text{year}, \text{barrel} = 0), \]</span> where <span class="math display">\[ \frac{p_{\text{barrel}}}{1 - p_{\text{barrel}}} = 
+\alpha_{\text{pitch_type}} * \frac{\mathbb{P}({\text{barrel}} \mid \text{pitch_loc})}{1 - \mathbb{P}({\text{barrel}} \mid \text{pitch_loc})}, \]</span> with <span class="math inline">\(\alpha_{\text{pitch_type}}\)</span> corresponding to the multipliers given above.</p>
+<pre class="r"><code>all_pitches &lt;- all_pitches %&gt;%
+  left_join(looks, by = c(&quot;plate_x&quot;, &quot;plate_z&quot;)) %&gt;%
+  left_join(smooth_contact, by = c(&quot;plate_x&quot;, &quot;plate_z&quot;)) %&gt;%
+  left_join(fouls, by = c(&quot;plate_x&quot;, &quot;plate_z&quot;, &quot;pitch_type&quot;)) %&gt;%
+  mutate(p_swing = fitted(swing_fit))
+
+# Values of p_foul are NA for locations where no batters swung. These can be safely
+#   set to zero.
+all_pitches &lt;- all_pitches %&gt;%
+  mutate(p_foul = ifelse(is.na(p_foul), 0, p_foul))
+
+all_pitches &lt;- all_pitches %&gt;%
+  left_join(barrels_by_loc, by = c(&quot;plate_x&quot;, &quot;plate_z&quot;)) %&gt;%
+  mutate(p_barrel = ifelse(is.na(p_barrel), 0, p_barrel)) 
+
+# Pitch type multiplier:
+all_pitches &lt;- all_pitches %&gt;%
+  mutate(p_barrel = predict(barrel_fit, newdata = all_pitches, type = &quot;response&quot;))
+
+all_pitches &lt;- all_pitches %&gt;%
+  left_join(wobacon, by = &quot;game_year&quot;) %&gt;%
+  mutate(wOBACON = p_barrel * wOBAbrl + (1 - p_barrel) * wOBAwk) %&gt;%
+  select(-p_barrel, -wOBAbrl, -wOBAwk)
+
+saveRDS(all_pitches, &quot;output/mlb_wprobs.rds&quot;)</code></pre>
 <br> <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
@@ -1060,19 +1237,19 @@ saveRDS(pitchloc_res, &quot;output/pitchloc_res.rds&quot;)</code></pre>
 #&gt; [9] tidyverse_1.2.1
 #&gt; 
 #&gt; loaded via a namespace (and not attached):
-#&gt;  [1] Rcpp_1.0.1       cellranger_1.1.0 pillar_1.3.1     compiler_3.5.3  
-#&gt;  [5] git2r_0.25.2     workflowr_1.2.0  tools_3.5.3      digest_0.6.18   
-#&gt;  [9] lubridate_1.7.4  jsonlite_1.6     evaluate_0.13    nlme_3.1-137    
-#&gt; [13] gtable_0.3.0     lattice_0.20-38  pkgconfig_2.0.2  rlang_0.4.2     
-#&gt; [17] cli_1.1.0        rstudioapi_0.10  yaml_2.2.0       haven_2.1.1     
-#&gt; [21] xfun_0.6         withr_2.1.2      xml2_1.2.0       httr_1.4.0      
-#&gt; [25] knitr_1.22       hms_0.4.2        generics_0.0.2   fs_1.2.7        
-#&gt; [29] rprojroot_1.3-2  grid_3.5.3       tidyselect_0.2.5 glue_1.3.1      
-#&gt; [33] R6_2.4.0         readxl_1.3.1     rmarkdown_1.12   modelr_0.1.5    
-#&gt; [37] magrittr_1.5     whisker_0.3-2    backports_1.1.3  scales_1.0.0    
-#&gt; [41] htmltools_0.3.6  rvest_0.3.4      assertthat_0.2.1 colorspace_1.4-1
-#&gt; [45] labeling_0.3     stringi_1.4.3    lazyeval_0.2.2   munsell_0.5.0   
-#&gt; [49] broom_0.5.1      crayon_1.3.4</code></pre>
+#&gt;  [1] Rcpp_1.0.1       highr_0.8        cellranger_1.1.0 pillar_1.3.1    
+#&gt;  [5] compiler_3.5.3   git2r_0.25.2     workflowr_1.2.0  tools_3.5.3     
+#&gt;  [9] digest_0.6.18    lubridate_1.7.4  jsonlite_1.6     evaluate_0.13   
+#&gt; [13] nlme_3.1-137     gtable_0.3.0     lattice_0.20-38  pkgconfig_2.0.2 
+#&gt; [17] rlang_0.4.2      cli_1.1.0        rstudioapi_0.10  yaml_2.2.0      
+#&gt; [21] haven_2.1.1      xfun_0.6         withr_2.1.2      xml2_1.2.0      
+#&gt; [25] httr_1.4.0       knitr_1.22       hms_0.4.2        generics_0.0.2  
+#&gt; [29] fs_1.2.7         rprojroot_1.3-2  grid_3.5.3       tidyselect_0.2.5
+#&gt; [33] glue_1.3.1       R6_2.4.0         readxl_1.3.1     rmarkdown_1.12  
+#&gt; [37] modelr_0.1.5     magrittr_1.5     whisker_0.3-2    backports_1.1.3 
+#&gt; [41] scales_1.0.0     htmltools_0.3.6  rvest_0.3.4      assertthat_0.2.1
+#&gt; [45] colorspace_1.4-1 labeling_0.3     stringi_1.4.3    lazyeval_0.2.2  
+#&gt; [49] munsell_0.5.0    broom_0.5.1      crayon_1.3.4</code></pre>
 </div>
 </div>
 
