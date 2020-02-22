@@ -438,7 +438,7 @@ div.section {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2020-02-21
+<strong>Last updated:</strong> 2020-02-22
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -517,10 +517,10 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtreea1a0af7c529fde403f51bee5438d493e83812aadtargetblanka1a0af7a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/MLB/tree/a1a0af7c529fde403f51bee5438d493e83812aad" target="_blank">a1a0af7</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtree31c29636eb776fc970f4ba2e6d5e5b1b1e870a2atargetblank31c2963a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/MLB/tree/31c29636eb776fc970f4ba2e6d5e5b1b1e870a2a" target="_blank">31c2963</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtreea1a0af7c529fde403f51bee5438d493e83812aadtargetblanka1a0af7a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtree31c29636eb776fc970f4ba2e6d5e5b1b1e870a2atargetblank31c2963a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -558,6 +558,7 @@ Untracked files:
     Untracked:  data/standard2019NP.csv
     Untracked:  output/event_vals.rds
     Untracked:  output/mlb_preproc.rds
+    Untracked:  output/mlb_wprobs.rds
     Untracked:  output/pitchloc_res.rds
 
 Unstaged changes:
@@ -602,6 +603,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/willwerscheid/MLB/blob/31c29636eb776fc970f4ba2e6d5e5b1b1e870a2a/analysis/countloc_preproc.Rmd" target="_blank">31c2963</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-02-22
+</td>
+<td>
+wflow_publish(“analysis/countloc_preproc.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/MLB/eb4e3a86bc6d45b3014fe064b7fa9fc15e7666d6/docs/countloc_preproc.html" target="_blank">eb4e3a8</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-02-21
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -948,6 +983,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/willwerscheid/MLB/blob/eb4e3a86bc6d45b3014fe064b7fa9fc15e7666d6/docs/figure/countloc_preproc.Rmd/loc-1.png" target="_blank">eb4e3a8</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-02-21
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/willwerscheid/MLB/blob/7aab8e48c972881d5ecc8f68aef0db5d9a18429a/docs/figure/countloc_preproc.Rmd/loc-1.png" target="_blank">7aab8e4</a>
 </td>
 <td>
@@ -991,7 +1037,7 @@ paste0(round(100 * (prev_nrow - nrow(all_pitches)) / prev_nrow, 1),
          called_strike = 1L * (description == &quot;called_strike&quot;)) %&gt;%
   select(PA_ID, pa_woba_value, pa_woba_denom, game_year, player_name, balls, strikes, 
          pitch_type, plate_x, plate_z, swing, contact, foul, called_strike, 
-         woba_value, woba_denom)
+         barrel)
 
 saveRDS(all_pitches, &quot;output/mlb_preproc.rds&quot;)</code></pre>
 <br> <br>
