@@ -209,7 +209,7 @@ all_pitches <- all_pitches %>%
          called_strike = 1L * (description == "called_strike")) %>%
   select(PA_ID, pa_woba_value, pa_woba_denom, game_year, player_name, balls, strikes, 
          pitch_type, plate_x, plate_z, swing, contact, foul, called_strike, 
-         woba_value, woba_denom)
+         barrel)
 
 saveRDS(all_pitches, "output/mlb_preproc.rds")
 ```
