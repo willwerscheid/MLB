@@ -13,39 +13,25 @@ knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, comment = "#>")
 
 ## Introduction
 
-My plate discipline metrics follow from the idea that a value can be assigned to either taking or swinging at a pitch, based solely on the pitch count and the location of the pitch. 
+My plate discipline metric follows from the idea that a value can be assigned to either taking or swinging at a pitch, based solely on the pitch type, pitch count, and pitch location. 
 
-The idea builds upon Tango, Lichtman, and Dolphin's argument that each pitch count can be associated with an expected wOBA (weighted on-base average). It was also Tango, I think, who developed the wOBACON statistic. The statistic is somewhat erroneously named: "CON" stands for contact, but wOBACON is actually the expected wOBA conditional on a ball being put into play (that is, it excludes foul balls). I calculate year-to-year wOBACON and count-specific wOBA values [here](countloc_woba.html).
+The idea builds upon Tango, Lichtman, and Dolphin's argument that each pitch count can be associated with an expected wOBA (weighted on-base average). It was also Tango, I think, who developed the wOBACON statistic. The statistic is somewhat erroneously named: "CON" stands for contact, but wOBACON is actually the expected wOBA conditional on a ball being put into play (that is, it excludes foul balls). I calculate count-specific wOBA values [here](countloc_woba.html).
 
-The crux of Tango and co.'s argument is that every pitch brings about a change of state: from one pitch count to another, or from a pitch count to a ball in play. My observation is that the decision to swing or not to swing limits the possibilities: if a batter swings, the result can be a strike, foul, or ball in play, while taking the pitch can only result in a ball or strike.
+The crux of Tango and co.'s argument is that every pitch brings about a change of state: from one pitch count to another, or from a pitch count to a ball in play. And of course, the decision to swing or not to swing limits the possibilities: if a batter swings, the result can be a strike, foul, or ball in play, while taking the pitch can only result in a ball or strike.
 
 For example, let the count be 2-1. The expected change in wOBA conditional on the batter swinging is:
 $$ (1 - p_{\text{contact}} + p_{\text{contact}} p_{\text{foul}}) (\text{wOBA}_{\text{2-2}} - \text{wOBA}_{\text{2-1}}) + p_{\text{contact}} (1 - p_{foul}) (\text{wOBACON} - \text{wOBA}_{\text{2-1}}) $$
 The expected change conditional on the batter taking the pitch is:
-$$ p_{strike} (\text{wOBA}_{\text{2-2}} - \text{wOBA}_{\text{2-1}}) + (1 -  p_{strike}) (\text{wOBA}_{\text{3-1}} - \text{wOBA}_{\text{2-1}}) $$
+$$ p_{\text{strike}} (\text{wOBA}_{\text{2-2}} - \text{wOBA}_{\text{2-1}}) + (1 -  p_{\text{strike}}) (\text{wOBA}_{\text{3-1}} - \text{wOBA}_{\text{2-1}}) $$
 
-I evaluate plate discipline by abstracting away a hitter's individual ability to make contact. In other words, I calculate $p_{\text{contact}}$ (the probability of making contact with a pitch) and $p_{\text{foul}}$ (the probability of fouling off a pitch, conditional on making contact) for an **average** hitter, conditioning only on pitch location. I calculate these probabilities [here](countloc_pitchloc.html).
+I evaluate plate discipline by abstracting away a hitter's individual ability to make contact. In other words, I calculate $p_{\text{contact}}$ (the probability of making contact with a pitch),  $p_{\text{foul}}$ (the probability of fouling off a pitch, conditional on making contact), and wOBACON for an **average** hitter, conditioning only on pitch location (and, for $p_{\text{foul}}$ and wOBACON, pitch type). I calculate each of those probabilities [here](countloc_pitchloc.html).
 
-For each pitch, then, I have a way to calculate the expected change in wOBA when an average batter swings at a pitch and when an average batter takes a pitch. This says something about, for example, when an average batter should be swinging:
+For each pitch, then, it's possible to calculate the expected change in wOBA when an average batter swings at a pitch and when an average batter takes a pitch. This says something about, for example, when an average batter should be swinging:
 
 ```{r swing_val}
 suppressMessages(library(tidyverse))
 
-all_pitches <- readRDS("output/mlb_preproc.rds")
-event_vals <- readRDS("output/event_vals.rds")
-pitchloc_res <- readRDS("output/pitchloc_res.rds")
-
-all_pitches <- all_pitches %>%
-  left_join(event_vals, by = c("game_year", "balls", "strikes")) %>%
-  left_join(pitchloc_res$looks, by = c("plate_x", "plate_z")) %>%
-  left_join(pitchloc_res$contact, by = c("plate_x", "plate_z")) %>%
-  left_join(pitchloc_res$fouls, by = c("plate_x", "plate_z")) %>%
-  left_join(pitchloc_res$swings, by = c("plate_x", "plate_z", "balls", "strikes"))
-
-# Values of p_foul are NA for locations where no batters swung. These can be safely
-#   set to zero.
-all_pitches <- all_pitches %>%
-  mutate(p_foul = ifelse(is.na(p_foul), 0, p_foul))
+all_pitches <- readRDS("output/mlb_eventvals.rds")
 
 all_pitches <- all_pitches %>%
   mutate(swing_value = (1 - p_contact) * strike_value + p_contact * p_foul * foul_value +
@@ -74,7 +60,7 @@ ggplot(plot_df, aes(x = plate_x, y = plate_z, fill = swing_benefit)) +
   facet_wrap(~count, nrow = 4, ncol = 3)
 ```
 
-Almost there: the last building block I need is an estimate of average hitters' swing rates. I don't want to give too much credit for making an easy decision: it's much better not to swing when there are three balls and the pitch is low and outside, but if 99% of hitters decline to swing, then they shouldn't be singled out for praise (I do, however, want to punish the 1% who do swing at these pitches). In other words, I'd like to evalute a hitter's decision to swing or not to swing relative to an average hitter in a similar situation (i.e., same pitch count, same pitch location).
+The last thing required is an estimate of average hitters' swing rates. We don't want to give too much credit for making an easy decision: it's much better not to swing when there are three balls and the pitch is low and outside, but if 99% of hitters decline to swing, then they shouldn't be singled out for praise (we should, however, punish the 1% who do swing at these pitches). In other words, I'd like to evalute a hitter's decision to swing or not to swing relative to an average hitter in a similar situation (i.e., same pitch count, same pitch location).
 
 ```{r avg_woba_chg}
 all_pitches <- all_pitches %>%
@@ -89,19 +75,25 @@ An example might be helpful at this point. The following is a plate appearance c
 ```{r ex}
 ex <- all_pitches %>%
   filter(PA_ID == 6666) %>%
-  select(player_name:called_strike, ball_value:wOBAaa) %>%
+  select(player_name:called_strike, p_strike:wOBAaa) %>%
   arrange(balls + strikes)
-knitr::kable(ex %>% select(balls:HIP_value), digits = 3)
-knitr::kable(ex %>% select(balls:strikes, p_strike:wOBAaa), digits = 3)
+knitr::kable(ex %>% select(balls:p_swing), digits = 3)
+knitr::kable(ex %>% select(balls:strikes, wOBACON:wOBAaa), digits = 3)
 ```
 
-The first pitch is low (the bottom of the strike zone is `plate_z` $\approx 1.3$) and almost certain to be called a ball (`p_strike` $\approx 0$), so it's much more advantageous to take the pitch (the difference between `take_value` and `swing_value` is about 70 points in expected wOBA). Diaz correctly takes the pitch, but so do 82% of batters (see `p_swing`), so Diaz only gets credited with 12 points of wOBAaa. The next pitch is a probable strike (`p_strike` $\approx 0.88$) with a good chance of contact (`p_contact` $\approx 0.79$), so it's more advantageous to swing even though it's a hitter's count (the difference is about 11 points in expected wOBA). Diaz again makes the correct decision, as do 62% of hitters, so Diaz is credited with 4 points of wOBAaa. Diaz makes contact, flying out to center field and ending the plate appearance. For this PA, then, Diaz's plate discipline has resulted in an expected wOBA that is 16 points higher than the expected wOBA for a batter with average plate discipline.
+The first pitch is low (the bottom of the strike zone is `plate_z` $\approx 1.3$) and almost certain to be called a ball (`p_strike` $\approx 0$), so it's much more advantageous to take the pitch (the difference between `take_value` and `swing_value` is about 83 points in expected wOBA). Diaz correctly takes the pitch, but so do 87% of batters (see `p_swing`), so Diaz only gets credited with 20 points of wOBAaa. The next pitch is a probable strike (`p_strike` $\approx 0.88$) with a good chance of contact (`p_contact` $\approx 0.79$), but it's a hitter's count so it's only slightly more advantageous to swing (the difference is about 8 points in expected wOBA). Diaz again makes the correct decision, as do 58% of hitters, so Diaz is credited with 3 points of wOBAaa. Diaz makes contact, flying out to center field and ending the plate appearance. For this PA, then, Diaz's plate discipline has resulted in an expected wOBA that is 23 points higher than the expected wOBA for a batter with average plate discipline.
 
 ## Results: Yearly totals
 
 By taking the mean over all plate appearances, I estimate the total wOBA that can be ascribed to plate discipline alone. The 2019 leaders (with a minimum of 200 PAs) are:
 
 ```{r player_res}
+# Due to all of the approximations involved, the results need to be recentered.
+all_pitches <- all_pitches %>%
+  group_by(balls, strikes) %>%
+  mutate(wOBAaa = scale(wOBAaa, center = TRUE, scale = FALSE)) %>%
+  ungroup()
+
 player_res <- all_pitches %>%
   group_by(player_name, game_year) %>%
   summarize(n_PA = length(unique(PA_ID)),
@@ -121,7 +113,7 @@ The bottom ten are:
 knitr::kable(player_res %>% top_n(10, desc(`2019`)) %>% arrange(`2019`), digits = 3)
 ```
 
-To interpret: Javier Baez posted a wOBA of .347 in 2019. This is already above average, but if he had been able to improve his plate discipline to league average, then --- assuming average contact rates and wOBACON --- he would have posted a wOBA of .394, which would have put him in the top ten (and tied with Juan Soto). 
+To interpret: Javier Baez posted a wOBA of .347 in 2019. This is already above average, but if he had been able to improve his plate discipline to league average, then --- assuming average contact rates and wOBACON --- he would have posted a formidable wOBA of .392.
 
 (Of course, the assumption about average contact rates and wOBACON is inaccurate; I'll use player-specific contact rates and wOBACON in a subsequent analysis. However, I wanted to first do an analysis in which plate discipline was strictly comparable from player to player: players are penalized equally for swinging at the same bad pitches, and rewarded equally for swinging at meatballs.)
 
@@ -137,7 +129,7 @@ This is good: players who have above-average plate discipline tend to stay above
 
 ## Results: First pitch
 
-I'm also interesting in results for particular pitch counts. For example, I'd like to know who has the best (and worst) plate discipline when the count is 0-0:
+I'm also interested in results for particular pitch counts. For example, I'd like to know who has the best (and worst) plate discipline when the count is 0-0:
 
 ```{r firstpitch}
 first_pitch <- all_pitches %>%
@@ -170,7 +162,7 @@ ggplot(plot_df, aes(x = plate_x, y = plate_z, shape = factor(swing), col = wOBAa
   facet_wrap(~player_name)
 ```
 
-Clearly, Lucroy is taking too many pitches over the middle of the plate: as a result, he loses about 8 points of wOBA. Khris Davis swings at most of these pitches, and while he also swings at a few pitches outside the zone, he ends up netting around 7 points of wOBA at 0-0.
+Clearly, Lucroy is taking too many pitches over the middle of the plate: as a result, he loses about 9 points of wOBA. Khris Davis swings at most of these pitches, and while he also swings at a few pitches outside the zone, he ends up netting around 8 points of wOBA at 0-0.
 
 ## Results: Full count
 
@@ -207,16 +199,17 @@ ggplot(plot_df, aes(x = plate_x, y = plate_z, shape = factor(swing), col = wOBAa
   facet_wrap(~player_name)
 ```
 
-Voit almost always takes on 3-2, while Baez chases a lot of bad pitches. As a result, Voit gains an expected 71 points of wOBA, while Baez loses a whopping 122. (I emphasize that this is only for PAs that reach full count: it does not subtract 122 points from Baez's total wOBA, but rather, since only around 11% of his PAs reach full count, the overall penalty is 14 points.)
+Voit almost always takes on 3-2, while Baez chases a lot of bad pitches. As a result, Voit gains an expected 90 points of wOBA, while Baez loses a whopping 103. (I emphasize that this is only for PAs that reach full count: it does not subtract 103 points from Baez's total wOBA; rather, since only around 11% of his PAs reach full count, the overall penalty is 11 points.)
 
 ## Appendix: Pitch selection
 
-Incidentally, the estimates of average swinging behavior allow us to say something about where a pitcher should locate a pitch when facing an average hitter. In the plots below, the red areas are favorable for the pitcher, while the green areas give an advantage to the hitter. The upshot: it's best to pitch over the middle of the plate until there's one strike; with more strikes, the pitcher can start to locate pitches at the edges of the strike zone; in any case, though, it's a very bad idea to pitch off of the plate when there are three balls. Even at 3-2, a pitcher should prefer the middle of the strike zone to a pitch off of the plate.
+Incidentally, the estimates of average swinging behavior allow us to say something about where a pitcher should locate a pitch when facing an average hitter. The plots below are for four-seamers: the red areas are favorable for the pitcher, while the green areas give an advantage to the hitter. The upshot: it's best to pitch near the middle of the plate until there's one strike; with more strikes, the pitcher should start to locate pitches at the edges of the strike zone; in any case, though, it's a very bad idea to pitch off of the plate when there are three balls. Even at 3-2, a pitcher should prefer the middle of the strike zone to a pitch off of the plate.
 
 (Of course, these recommendations can be improved when the hitter's specific preferences are known. I plan to tackle this problem in a future analysis.)
 
 ```{r pitch_rec}
 plot_df <- all_pitches %>%
+  filter(pitch_type == "FF") %>%
   group_by(balls, strikes, plate_x, plate_z) %>%
   summarize(avg_wOBA_chg = mean(avg_wOBA_chg)) %>%
   ungroup() %>%
