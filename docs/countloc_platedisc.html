@@ -455,7 +455,7 @@ div.section {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2020-02-21
+<strong>Last updated:</strong> 2020-02-22
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -534,10 +534,10 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtreeb4b2983fcf30e5d285ba20a4bd9a14a269ab3d5ftargetblankb4b2983a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/MLB/tree/b4b2983fcf30e5d285ba20a4bd9a14a269ab3d5f" target="_blank">b4b2983</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtreea912c67c38ef811d3926a52039729d9c94f4379dtargetblanka912c67a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/willwerscheid/MLB/tree/a912c67c38ef811d3926a52039729d9c94f4379d" target="_blank">a912c67</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtreeb4b2983fcf30e5d285ba20a4bd9a14a269ab3d5ftargetblankb4b2983a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomwillwerscheidMLBtreea912c67c38ef811d3926a52039729d9c94f4379dtargetblanka912c67a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -573,9 +573,9 @@ Untracked files:
     Untracked:  data/standard2018NP.csv
     Untracked:  data/standard2019.csv
     Untracked:  data/standard2019NP.csv
-    Untracked:  output/event_vals.rds
+    Untracked:  output/mlb_eventvals.rds
     Untracked:  output/mlb_preproc.rds
-    Untracked:  output/pitchloc_res.rds
+    Untracked:  output/mlb_wprobs.rds
 
 Unstaged changes:
     Modified:   .gitignore
@@ -618,6 +618,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/willwerscheid/MLB/blob/a912c67c38ef811d3926a52039729d9c94f4379d/analysis/countloc_platedisc.Rmd" target="_blank">a912c67</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-02-22
+</td>
+<td>
+wflow_publish(“analysis/countloc_platedisc.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/willwerscheid/MLB/d11ca04fbd1cc942dd102451ac7a346541ab20c3/docs/countloc_platedisc.html" target="_blank">d11ca04</a>
+</td>
+<td>
+Jason Willwerscheid
+</td>
+<td>
+2020-02-21
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -678,29 +712,15 @@ wflow_publish(“analysis/countloc_platedisc.Rmd”)
 </div>
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
-<p>My plate discipline metrics follow from the idea that a value can be assigned to either taking or swinging at a pitch, based solely on the pitch count and the location of the pitch.</p>
-<p>The idea builds upon Tango, Lichtman, and Dolphin’s argument that each pitch count can be associated with an expected wOBA (weighted on-base average). It was also Tango, I think, who developed the wOBACON statistic. The statistic is somewhat erroneously named: “CON” stands for contact, but wOBACON is actually the expected wOBA conditional on a ball being put into play (that is, it excludes foul balls). I calculate year-to-year wOBACON and count-specific wOBA values <a href="countloc_woba.html">here</a>.</p>
-<p>The crux of Tango and co.’s argument is that every pitch brings about a change of state: from one pitch count to another, or from a pitch count to a ball in play. My observation is that the decision to swing or not to swing limits the possibilities: if a batter swings, the result can be a strike, foul, or ball in play, while taking the pitch can only result in a ball or strike.</p>
-<p>For example, let the count be 2-1. The expected change in wOBA conditional on the batter swinging is: <span class="math display">\[ (1 - p_{\text{contact}} + p_{\text{contact}} p_{\text{foul}}) (\text{wOBA}_{\text{2-2}} - \text{wOBA}_{\text{2-1}}) + p_{\text{contact}} (1 - p_{foul}) (\text{wOBACON} - \text{wOBA}_{\text{2-1}}) \]</span> The expected change conditional on the batter taking the pitch is: <span class="math display">\[ p_{strike} (\text{wOBA}_{\text{2-2}} - \text{wOBA}_{\text{2-1}}) + (1 -  p_{strike}) (\text{wOBA}_{\text{3-1}} - \text{wOBA}_{\text{2-1}}) \]</span></p>
-<p>I evaluate plate discipline by abstracting away a hitter’s individual ability to make contact. In other words, I calculate <span class="math inline">\(p_{\text{contact}}\)</span> (the probability of making contact with a pitch) and <span class="math inline">\(p_{\text{foul}}\)</span> (the probability of fouling off a pitch, conditional on making contact) for an <strong>average</strong> hitter, conditioning only on pitch location. I calculate these probabilities <a href="countloc_pitchloc.html">here</a>.</p>
-<p>For each pitch, then, I have a way to calculate the expected change in wOBA when an average batter swings at a pitch and when an average batter takes a pitch. This says something about, for example, when an average batter should be swinging:</p>
+<p>My plate discipline metric follows from the idea that a value can be assigned to either taking or swinging at a pitch, based solely on the pitch type, pitch count, and pitch location.</p>
+<p>The idea builds upon Tango, Lichtman, and Dolphin’s argument that each pitch count can be associated with an expected wOBA (weighted on-base average). It was also Tango, I think, who developed the wOBACON statistic. The statistic is somewhat erroneously named: “CON” stands for contact, but wOBACON is actually the expected wOBA conditional on a ball being put into play (that is, it excludes foul balls). I calculate count-specific wOBA values <a href="countloc_woba.html">here</a>.</p>
+<p>The crux of Tango and co.’s argument is that every pitch brings about a change of state: from one pitch count to another, or from a pitch count to a ball in play. And of course, the decision to swing or not to swing limits the possibilities: if a batter swings, the result can be a strike, foul, or ball in play, while taking the pitch can only result in a ball or strike.</p>
+<p>For example, let the count be 2-1. The expected change in wOBA conditional on the batter swinging is: <span class="math display">\[ (1 - p_{\text{contact}} + p_{\text{contact}} p_{\text{foul}}) (\text{wOBA}_{\text{2-2}} - \text{wOBA}_{\text{2-1}}) + p_{\text{contact}} (1 - p_{foul}) (\text{wOBACON} - \text{wOBA}_{\text{2-1}}) \]</span> The expected change conditional on the batter taking the pitch is: <span class="math display">\[ p_{\text{strike}} (\text{wOBA}_{\text{2-2}} - \text{wOBA}_{\text{2-1}}) + (1 -  p_{\text{strike}}) (\text{wOBA}_{\text{3-1}} - \text{wOBA}_{\text{2-1}}) \]</span></p>
+<p>I evaluate plate discipline by abstracting away a hitter’s individual ability to make contact. In other words, I calculate <span class="math inline">\(p_{\text{contact}}\)</span> (the probability of making contact with a pitch), <span class="math inline">\(p_{\text{foul}}\)</span> (the probability of fouling off a pitch, conditional on making contact), and wOBACON for an <strong>average</strong> hitter, conditioning only on pitch location (and, for <span class="math inline">\(p_{\text{foul}}\)</span> and wOBACON, pitch type). I calculate each of those probabilities <a href="countloc_pitchloc.html">here</a>.</p>
+<p>For each pitch, then, it’s possible to calculate the expected change in wOBA when an average batter swings at a pitch and when an average batter takes a pitch. This says something about, for example, when an average batter should be swinging:</p>
 <pre class="r"><code>suppressMessages(library(tidyverse))
 
-all_pitches &lt;- readRDS(&quot;output/mlb_preproc.rds&quot;)
-event_vals &lt;- readRDS(&quot;output/event_vals.rds&quot;)
-pitchloc_res &lt;- readRDS(&quot;output/pitchloc_res.rds&quot;)
-
-all_pitches &lt;- all_pitches %&gt;%
-  left_join(event_vals, by = c(&quot;game_year&quot;, &quot;balls&quot;, &quot;strikes&quot;)) %&gt;%
-  left_join(pitchloc_res$looks, by = c(&quot;plate_x&quot;, &quot;plate_z&quot;)) %&gt;%
-  left_join(pitchloc_res$contact, by = c(&quot;plate_x&quot;, &quot;plate_z&quot;)) %&gt;%
-  left_join(pitchloc_res$fouls, by = c(&quot;plate_x&quot;, &quot;plate_z&quot;)) %&gt;%
-  left_join(pitchloc_res$swings, by = c(&quot;plate_x&quot;, &quot;plate_z&quot;, &quot;balls&quot;, &quot;strikes&quot;))
-
-# Values of p_foul are NA for locations where no batters swung. These can be safely
-#   set to zero.
-all_pitches &lt;- all_pitches %&gt;%
-  mutate(p_foul = ifelse(is.na(p_foul), 0, p_foul))
+all_pitches &lt;- readRDS(&quot;output/mlb_eventvals.rds&quot;)
 
 all_pitches &lt;- all_pitches %&gt;%
   mutate(swing_value = (1 - p_contact) * strike_value + p_contact * p_foul * foul_value +
@@ -765,7 +785,7 @@ Jason Willwerscheid
 </table>
 </div>
 </div>
-<p>Almost there: the last building block I need is an estimate of average hitters’ swing rates. I don’t want to give too much credit for making an easy decision: it’s much better not to swing when there are three balls and the pitch is low and outside, but if 99% of hitters decline to swing, then they shouldn’t be singled out for praise (I do, however, want to punish the 1% who do swing at these pitches). In other words, I’d like to evalute a hitter’s decision to swing or not to swing relative to an average hitter in a similar situation (i.e., same pitch count, same pitch location).</p>
+<p>The last thing required is an estimate of average hitters’ swing rates. We don’t want to give too much credit for making an easy decision: it’s much better not to swing when there are three balls and the pitch is low and outside, but if 99% of hitters decline to swing, then they shouldn’t be singled out for praise (we should, however, punish the 1% who do swing at these pitches). In other words, I’d like to evalute a hitter’s decision to swing or not to swing relative to an average hitter in a similar situation (i.e., same pitch count, same pitch location).</p>
 <pre class="r"><code>all_pitches &lt;- all_pitches %&gt;%
   mutate(avg_wOBA_chg = p_swing * swing_value + (1 - p_swing) * take_value,
          wOBAaa = swing * swing_value + (1 - swing) * take_value - avg_wOBA_chg)</code></pre>
@@ -775,67 +795,71 @@ Jason Willwerscheid
 <p>An example might be helpful at this point. The following is a plate appearance chosen at random, featuring Aledmys Diaz at bat:</p>
 <pre class="r"><code>ex &lt;- all_pitches %&gt;%
   filter(PA_ID == 6666) %&gt;%
-  select(player_name:called_strike, ball_value:wOBAaa) %&gt;%
+  select(player_name:called_strike, p_strike:wOBAaa) %&gt;%
   arrange(balls + strikes)
-knitr::kable(ex %&gt;% select(balls:HIP_value), digits = 3)</code></pre>
+knitr::kable(ex %&gt;% select(balls:p_swing), digits = 3)</code></pre>
 <table>
 <thead>
 <tr class="header">
 <th align="left">balls</th>
-<th align="left">strikes</th>
+<th>strikes p</th>
+<th align="left">itch_type</th>
 <th align="left">plate_x</th>
 <th align="left">plate_z</th>
 <th align="left">swing</th>
 <th align="left">contact</th>
 <th align="left">foul</th>
 <th align="left">called_strike</th>
-<th align="left">ball_value</th>
-<th align="left">strike_value</th>
-<th align="left">foul_value</th>
-<th align="left">HIP_value</th>
+<th align="left">p_strike</th>
+<th align="left">p_contact</th>
+<th align="left">p_foul</th>
+<th align="left">p_swing</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td align="left">0</td>
-<td align="left">0</td>
+<td>0</td>
+<td align="left">SL</td>
 <td align="left">0.4</td>
 <td align="left">1.0</td>
 <td align="left">0</td>
 <td align="left">0</td>
 <td align="left">0</td>
 <td align="left">0</td>
-<td align="left">0.041</td>
-<td align="left">-0.051</td>
-<td align="left">-0.051</td>
-<td align="left">0.059</td>
+<td align="left">0.000</td>
+<td align="left">0.415</td>
+<td align="left">0.465</td>
+<td align="left">0.234</td>
 </tr>
 <tr class="even">
 <td align="left">1</td>
-<td align="left">0</td>
+<td>0</td>
+<td align="left">FT</td>
 <td align="left">-0.4</td>
 <td align="left">3.2</td>
 <td align="left">1</td>
 <td align="left">1</td>
 <td align="left">0</td>
 <td align="left">0</td>
-<td align="left">0.067</td>
-<td align="left">-0.061</td>
-<td align="left">-0.061</td>
-<td align="left">0.018</td>
+<td align="left">0.879</td>
+<td align="left">0.794</td>
+<td align="left">0.550</td>
+<td align="left">0.577</td>
 </tr>
 </tbody>
 </table>
-<pre class="r"><code>knitr::kable(ex %&gt;% select(balls:strikes, p_strike:wOBAaa), digits = 3)</code></pre>
+<pre class="r"><code>knitr::kable(ex %&gt;% select(balls:strikes, wOBACON:wOBAaa), digits = 3)</code></pre>
 <table>
 <thead>
 <tr class="header">
 <th align="left">balls</th>
 <th align="left">strikes</th>
-<th align="left">p_strike</th>
-<th align="left">p_contact</th>
-<th align="left">p_foul</th>
-<th align="left">p_swing</th>
+<th align="left">wOBACON</th>
+<th align="left">ball_value</th>
+<th align="left">strike_value</th>
+<th align="left">foul_value</th>
+<th align="left">HIP_value</th>
 <th align="left">swing_value</th>
 <th align="left">take_value</th>
 <th align="left">avg_wOBA_chg</th>
@@ -846,35 +870,43 @@ knitr::kable(ex %&gt;% select(balls:HIP_value), digits = 3)</code></pre>
 <tr class="odd">
 <td align="left">0</td>
 <td align="left">0</td>
-<td align="left">0.000</td>
-<td align="left">0.416</td>
-<td align="left">0.487</td>
-<td align="left">0.176</td>
-<td align="left">-0.027</td>
+<td align="left">0.323</td>
 <td align="left">0.041</td>
-<td align="left">0.029</td>
-<td align="left">0.012</td>
+<td align="left">-0.051</td>
+<td align="left">-0.051</td>
+<td align="left">-0.013</td>
+<td align="left">-0.042</td>
+<td align="left">0.041</td>
+<td align="left">0.022</td>
+<td align="left">0.020</td>
 </tr>
 <tr class="even">
 <td align="left">1</td>
 <td align="left">0</td>
-<td align="left">0.879</td>
-<td align="left">0.794</td>
-<td align="left">0.576</td>
-<td align="left">0.623</td>
-<td align="left">-0.035</td>
-<td align="left">-0.046</td>
-<td align="left">-0.039</td>
+<td align="left">0.381</td>
+<td align="left">0.067</td>
+<td align="left">-0.061</td>
+<td align="left">-0.061</td>
 <td align="left">0.004</td>
+<td align="left">-0.038</td>
+<td align="left">-0.046</td>
+<td align="left">-0.041</td>
+<td align="left">0.003</td>
 </tr>
 </tbody>
 </table>
-<p>The first pitch is low (the bottom of the strike zone is <code>plate_z</code> <span class="math inline">\(\approx 1.3\)</span>) and almost certain to be called a ball (<code>p_strike</code> <span class="math inline">\(\approx 0\)</span>), so it’s much more advantageous to take the pitch (the difference between <code>take_value</code> and <code>swing_value</code> is about 70 points in expected wOBA). Diaz correctly takes the pitch, but so do 82% of batters (see <code>p_swing</code>), so Diaz only gets credited with 12 points of wOBAaa. The next pitch is a probable strike (<code>p_strike</code> <span class="math inline">\(\approx 0.88\)</span>) with a good chance of contact (<code>p_contact</code> <span class="math inline">\(\approx 0.79\)</span>), so it’s more advantageous to swing even though it’s a hitter’s count (the difference is about 11 points in expected wOBA). Diaz again makes the correct decision, as do 62% of hitters, so Diaz is credited with 4 points of wOBAaa. Diaz makes contact, flying out to center field and ending the plate appearance. For this PA, then, Diaz’s plate discipline has resulted in an expected wOBA that is 16 points higher than the expected wOBA for a batter with average plate discipline.</p>
+<p>The first pitch is low (the bottom of the strike zone is <code>plate_z</code> <span class="math inline">\(\approx 1.3\)</span>) and almost certain to be called a ball (<code>p_strike</code> <span class="math inline">\(\approx 0\)</span>), so it’s much more advantageous to take the pitch (the difference between <code>take_value</code> and <code>swing_value</code> is about 83 points in expected wOBA). Diaz correctly takes the pitch, but so do 87% of batters (see <code>p_swing</code>), so Diaz only gets credited with 20 points of wOBAaa. The next pitch is a probable strike (<code>p_strike</code> <span class="math inline">\(\approx 0.88\)</span>) with a good chance of contact (<code>p_contact</code> <span class="math inline">\(\approx 0.79\)</span>), but it’s a hitter’s count so it’s only slightly more advantageous to swing (the difference is about 8 points in expected wOBA). Diaz again makes the correct decision, as do 58% of hitters, so Diaz is credited with 3 points of wOBAaa. Diaz makes contact, flying out to center field and ending the plate appearance. For this PA, then, Diaz’s plate discipline has resulted in an expected wOBA that is 23 points higher than the expected wOBA for a batter with average plate discipline.</p>
 </div>
 <div id="results-yearly-totals" class="section level2">
 <h2>Results: Yearly totals</h2>
 <p>By taking the mean over all plate appearances, I estimate the total wOBA that can be ascribed to plate discipline alone. The 2019 leaders (with a minimum of 200 PAs) are:</p>
-<pre class="r"><code>player_res &lt;- all_pitches %&gt;%
+<pre class="r"><code># Due to all of the approximations involved, the results need to be recentered.
+all_pitches &lt;- all_pitches %&gt;%
+  group_by(balls, strikes) %&gt;%
+  mutate(wOBAaa = scale(wOBAaa, center = TRUE, scale = FALSE)) %&gt;%
+  ungroup()
+
+player_res &lt;- all_pitches %&gt;%
   group_by(player_name, game_year) %&gt;%
   summarize(n_PA = length(unique(PA_ID)),
             PDwOBA = sum(wOBAaa) / n_PA) %&gt;%
@@ -896,123 +928,123 @@ knitr::kable(player_res %&gt;% top_n(20, `2019`) %&gt;% arrange(desc(`2019`)), d
 <tbody>
 <tr class="odd">
 <td align="left">Andrew McCutchen</td>
-<td align="right">0.031</td>
-<td align="right">0.035</td>
-<td align="right">0.044</td>
+<td align="right">0.030</td>
+<td align="right">0.033</td>
+<td align="right">0.050</td>
 </tr>
 <tr class="even">
 <td align="left">Cavan Biggio</td>
 <td align="right">NA</td>
 <td align="right">NA</td>
-<td align="right">0.042</td>
+<td align="right">0.048</td>
 </tr>
 <tr class="odd">
-<td align="left">Alex Bregman</td>
-<td align="right">0.009</td>
+<td align="left">Juan Soto</td>
+<td align="right">NA</td>
 <td align="right">0.029</td>
-<td align="right">0.042</td>
+<td align="right">0.047</td>
 </tr>
 <tr class="even">
 <td align="left">Ji-Man Choi</td>
 <td align="right">NA</td>
-<td align="right">0.016</td>
-<td align="right">0.041</td>
+<td align="right">0.018</td>
+<td align="right">0.044</td>
 </tr>
 <tr class="odd">
 <td align="left">Jordan Luplow</td>
 <td align="right">NA</td>
 <td align="right">NA</td>
-<td align="right">0.040</td>
+<td align="right">0.042</td>
 </tr>
 <tr class="even">
-<td align="left">Juan Soto</td>
-<td align="right">NA</td>
-<td align="right">0.030</td>
-<td align="right">0.039</td>
+<td align="left">Alex Bregman</td>
+<td align="right">0.006</td>
+<td align="right">0.028</td>
+<td align="right">0.041</td>
 </tr>
 <tr class="odd">
 <td align="left">Matt Joyce</td>
-<td align="right">0.027</td>
-<td align="right">0.035</td>
-<td align="right">0.036</td>
-</tr>
-<tr class="even">
-<td align="left">George Springer</td>
-<td align="right">0.020</td>
-<td align="right">0.023</td>
-<td align="right">0.036</td>
-</tr>
-<tr class="odd">
-<td align="left">Russell Martin</td>
-<td align="right">0.023</td>
-<td align="right">0.035</td>
-<td align="right">0.035</td>
+<td align="right">0.031</td>
+<td align="right">0.039</td>
+<td align="right">0.039</td>
 </tr>
 <tr class="even">
 <td align="left">Carlos Santana</td>
-<td align="right">0.016</td>
-<td align="right">0.024</td>
-<td align="right">0.033</td>
+<td align="right">0.021</td>
+<td align="right">0.025</td>
+<td align="right">0.039</td>
+</tr>
+<tr class="odd">
+<td align="left">George Springer</td>
+<td align="right">0.021</td>
+<td align="right">0.025</td>
+<td align="right">0.038</td>
+</tr>
+<tr class="even">
+<td align="left">Russell Martin</td>
+<td align="right">0.022</td>
+<td align="right">0.034</td>
+<td align="right">0.038</td>
 </tr>
 <tr class="odd">
 <td align="left">Brandon Belt</td>
-<td align="right">0.029</td>
-<td align="right">0.026</td>
-<td align="right">0.033</td>
+<td align="right">0.027</td>
+<td align="right">0.030</td>
+<td align="right">0.037</td>
 </tr>
 <tr class="even">
 <td align="left">Marcus Semien</td>
-<td align="right">0.017</td>
-<td align="right">0.014</td>
-<td align="right">0.031</td>
+<td align="right">0.016</td>
+<td align="right">0.016</td>
+<td align="right">0.036</td>
 </tr>
 <tr class="odd">
-<td align="left">Yasmani Grandal</td>
-<td align="right">-0.007</td>
-<td align="right">0.009</td>
-<td align="right">0.031</td>
+<td align="left">Travis Shaw</td>
+<td align="right">-0.002</td>
+<td align="right">0.008</td>
+<td align="right">0.036</td>
 </tr>
 <tr class="even">
-<td align="left">Kris Bryant</td>
-<td align="right">0.018</td>
-<td align="right">0.011</td>
-<td align="right">0.030</td>
+<td align="left">Joey Votto</td>
+<td align="right">0.050</td>
+<td align="right">0.046</td>
+<td align="right">0.035</td>
 </tr>
 <tr class="odd">
-<td align="left">Joey Votto</td>
-<td align="right">0.047</td>
-<td align="right">0.044</td>
-<td align="right">0.030</td>
+<td align="left">Luke Voit</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">0.035</td>
+</tr>
+<tr class="even">
+<td align="left">Yasmani Grandal</td>
+<td align="right">-0.008</td>
+<td align="right">0.011</td>
+<td align="right">0.033</td>
+</tr>
+<tr class="odd">
+<td align="left">Brian Dozier</td>
+<td align="right">0.011</td>
+<td align="right">0.010</td>
+<td align="right">0.033</td>
 </tr>
 <tr class="even">
 <td align="left">Brandon Nimmo</td>
 <td align="right">NA</td>
 <td align="right">0.041</td>
-<td align="right">0.029</td>
+<td align="right">0.033</td>
 </tr>
 <tr class="odd">
-<td align="left">Tony Kemp</td>
-<td align="right">NA</td>
-<td align="right">0.022</td>
-<td align="right">0.029</td>
+<td align="left">Shin-Soo Choo</td>
+<td align="right">0.031</td>
+<td align="right">0.023</td>
+<td align="right">0.032</td>
 </tr>
 <tr class="even">
 <td align="left">Mike Trout</td>
-<td align="right">0.025</td>
-<td align="right">0.027</td>
-<td align="right">0.029</td>
-</tr>
-<tr class="odd">
-<td align="left">Chris Taylor</td>
-<td align="right">0.022</td>
-<td align="right">0.029</td>
 <td align="right">0.028</td>
-</tr>
-<tr class="even">
-<td align="left">Joe Panik</td>
-<td align="right">0.014</td>
-<td align="right">0.022</td>
-<td align="right">0.028</td>
+<td align="right">0.026</td>
+<td align="right">0.032</td>
 </tr>
 </tbody>
 </table>
@@ -1030,74 +1062,74 @@ knitr::kable(player_res %&gt;% top_n(20, `2019`) %&gt;% arrange(desc(`2019`)), d
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">Javier Baez</td>
-<td align="right">-0.038</td>
-<td align="right">-0.040</td>
+<td align="left">Jorge Alfaro</td>
+<td align="right">NA</td>
+<td align="right">-0.031</td>
 <td align="right">-0.047</td>
 </tr>
 <tr class="even">
-<td align="left">Jorge Alfaro</td>
-<td align="right">NA</td>
-<td align="right">-0.027</td>
-<td align="right">-0.044</td>
-</tr>
-<tr class="odd">
-<td align="left">Francisco Mejia</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">-0.037</td>
-</tr>
-<tr class="even">
-<td align="left">Gary Sanchez</td>
-<td align="right">-0.023</td>
-<td align="right">-0.023</td>
-<td align="right">-0.036</td>
+<td align="left">Javier Baez</td>
+<td align="right">-0.040</td>
+<td align="right">-0.042</td>
+<td align="right">-0.045</td>
 </tr>
 <tr class="odd">
 <td align="left">Harold Castro</td>
 <td align="right">NA</td>
 <td align="right">NA</td>
-<td align="right">-0.036</td>
+<td align="right">-0.040</td>
 </tr>
 <tr class="even">
-<td align="left">Rowdy Tellez</td>
+<td align="left">Francisco Mejia</td>
 <td align="right">NA</td>
 <td align="right">NA</td>
-<td align="right">-0.035</td>
+<td align="right">-0.037</td>
 </tr>
 <tr class="odd">
 <td align="left">Ronny Rodriguez</td>
 <td align="right">NA</td>
-<td align="right">-0.016</td>
-<td align="right">-0.035</td>
+<td align="right">-0.022</td>
+<td align="right">-0.036</td>
 </tr>
 <tr class="even">
-<td align="left">Jose Abreu</td>
-<td align="right">-0.023</td>
-<td align="right">-0.024</td>
-<td align="right">-0.032</td>
+<td align="left">Dawel Lugo</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">-0.035</td>
 </tr>
 <tr class="odd">
 <td align="left">Victor Reyes</td>
 <td align="right">NA</td>
-<td align="right">-0.039</td>
-<td align="right">-0.031</td>
+<td align="right">-0.035</td>
+<td align="right">-0.033</td>
+</tr>
+<tr class="even">
+<td align="left">Gary Sanchez</td>
+<td align="right">-0.021</td>
+<td align="right">-0.025</td>
+<td align="right">-0.033</td>
+</tr>
+<tr class="odd">
+<td align="left">Anthony Santander</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">-0.032</td>
 </tr>
 <tr class="even">
 <td align="left">Corey Dickerson</td>
-<td align="right">-0.043</td>
-<td align="right">-0.031</td>
-<td align="right">-0.031</td>
+<td align="right">-0.045</td>
+<td align="right">-0.029</td>
+<td align="right">-0.030</td>
 </tr>
 </tbody>
 </table>
-<p>To interpret: Javier Baez posted a wOBA of .347 in 2019. This is already above average, but if he had been able to improve his plate discipline to league average, then — assuming average contact rates and wOBACON — he would have posted a wOBA of .394, which would have put him in the top ten (and tied with Juan Soto).</p>
+<p>To interpret: Javier Baez posted a wOBA of .347 in 2019. This is already above average, but if he had been able to improve his plate discipline to league average, then — assuming average contact rates and wOBACON — he would have posted a formidable wOBA of .392.</p>
 <p>(Of course, the assumption about average contact rates and wOBACON is inaccurate; I’ll use player-specific contact rates and wOBACON in a subsequent analysis. However, I wanted to first do an analysis in which plate discipline was strictly comparable from player to player: players are penalized equally for swinging at the same bad pitches, and rewarded equally for swinging at meatballs.)</p>
 <p>As a sanity check, it’s good to verify that there is some autocorrelation from year to year. Each point in the plot below represents a player who had at least 200 PAs in both 2018 and 2019:</p>
 <pre class="r"><code>ggplot(player_res, aes(x = `2018`, y = `2019`)) + 
   geom_point() +
   geom_abline(slope = 1, linetype = &quot;dashed&quot;)</code></pre>
-<pre><code>#&gt; Warning: Removed 245 rows containing missing values (geom_point).</code></pre>
+<pre><code>#&gt; Warning: Removed 244 rows containing missing values (geom_point).</code></pre>
 <p><img src="figure/countloc_platedisc.Rmd/autocor-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-autocor-1">
@@ -1140,7 +1172,7 @@ Jason Willwerscheid
 </div>
 <div id="results-first-pitch" class="section level2">
 <h2>Results: First pitch</h2>
-<p>I’m also interesting in results for particular pitch counts. For example, I’d like to know who has the best (and worst) plate discipline when the count is 0-0:</p>
+<p>I’m also interested in results for particular pitch counts. For example, I’d like to know who has the best (and worst) plate discipline when the count is 0-0:</p>
 <pre class="r"><code>first_pitch &lt;- all_pitches %&gt;%
   filter(balls == 0, strikes == 0) %&gt;%
   group_by(player_name, game_year) %&gt;%
@@ -1162,55 +1194,55 @@ knitr::kable(first_pitch %&gt;% top_n(10, `2019`) %&gt;% arrange(desc(`2019`)), 
 <tbody>
 <tr class="odd">
 <td align="left">Khris Davis</td>
-<td align="right">0.005</td>
-<td align="right">0.005</td>
-<td align="right">0.007</td>
-</tr>
-<tr class="even">
-<td align="left">Brandon Lowe</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">0.007</td>
-</tr>
-<tr class="odd">
-<td align="left">Freddie Freeman</td>
-<td align="right">0.004</td>
 <td align="right">0.006</td>
 <td align="right">0.006</td>
+<td align="right">0.008</td>
 </tr>
 <tr class="even">
 <td align="left">Luke Voit</td>
 <td align="right">NA</td>
 <td align="right">NA</td>
-<td align="right">0.006</td>
+<td align="right">0.007</td>
 </tr>
 <tr class="odd">
-<td align="left">Chris Taylor</td>
-<td align="right">0.001</td>
-<td align="right">0.003</td>
-<td align="right">0.005</td>
+<td align="left">Brandon Lowe</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">0.007</td>
 </tr>
 <tr class="even">
-<td align="left">Oscar Mercado</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">0.005</td>
-</tr>
-<tr class="odd">
 <td align="left">Jordan Luplow</td>
 <td align="right">NA</td>
 <td align="right">NA</td>
-<td align="right">0.005</td>
+<td align="right">0.007</td>
+</tr>
+<tr class="odd">
+<td align="left">Oscar Mercado</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">0.006</td>
 </tr>
 <tr class="even">
-<td align="left">Jeff McNeil</td>
+<td align="left">Chris Taylor</td>
+<td align="right">0.000</td>
+<td align="right">0.004</td>
+<td align="right">0.006</td>
+</tr>
+<tr class="odd">
+<td align="left">Freddie Freeman</td>
+<td align="right">0.006</td>
+<td align="right">0.007</td>
+<td align="right">0.006</td>
+</tr>
+<tr class="even">
+<td align="left">Juan Soto</td>
 <td align="right">NA</td>
-<td align="right">0.005</td>
+<td align="right">0.002</td>
 <td align="right">0.005</td>
 </tr>
 <tr class="odd">
 <td align="left">Kole Calhoun</td>
-<td align="right">0.002</td>
+<td align="right">0.003</td>
 <td align="right">0.004</td>
 <td align="right">0.005</td>
 </tr>
@@ -1218,7 +1250,7 @@ knitr::kable(first_pitch %&gt;% top_n(10, `2019`) %&gt;% arrange(desc(`2019`)), 
 <td align="left">Jake Marisnick</td>
 <td align="right">0.000</td>
 <td align="right">0.000</td>
-<td align="right">0.004</td>
+<td align="right">0.005</td>
 </tr>
 </tbody>
 </table>
@@ -1235,9 +1267,9 @@ knitr::kable(first_pitch %&gt;% top_n(10, `2019`) %&gt;% arrange(desc(`2019`)), 
 <tbody>
 <tr class="odd">
 <td align="left">Jonathan Lucroy</td>
-<td align="right">-0.005</td>
-<td align="right">-0.004</td>
-<td align="right">-0.008</td>
+<td align="right">-0.007</td>
+<td align="right">-0.006</td>
+<td align="right">-0.009</td>
 </tr>
 <tr class="even">
 <td align="left">Ronny Rodriguez</td>
@@ -1246,21 +1278,21 @@ knitr::kable(first_pitch %&gt;% top_n(10, `2019`) %&gt;% arrange(desc(`2019`)), 
 <td align="right">-0.007</td>
 </tr>
 <tr class="odd">
-<td align="left">Curtis Granderson</td>
-<td align="right">-0.003</td>
-<td align="right">-0.003</td>
+<td align="left">Logan Forsythe</td>
+<td align="right">-0.004</td>
+<td align="right">-0.005</td>
 <td align="right">-0.006</td>
 </tr>
 <tr class="even">
-<td align="left">David Fletcher</td>
-<td align="right">NA</td>
-<td align="right">-0.004</td>
-<td align="right">-0.005</td>
-</tr>
-<tr class="odd">
 <td align="left">Victor Reyes</td>
 <td align="right">NA</td>
 <td align="right">NA</td>
+<td align="right">-0.005</td>
+</tr>
+<tr class="odd">
+<td align="left">David Fletcher</td>
+<td align="right">NA</td>
+<td align="right">-0.005</td>
 <td align="right">-0.005</td>
 </tr>
 </tbody>
@@ -1317,7 +1349,7 @@ Jason Willwerscheid
 </table>
 </div>
 </div>
-<p>Clearly, Lucroy is taking too many pitches over the middle of the plate: as a result, he loses about 8 points of wOBA. Khris Davis swings at most of these pitches, and while he also swings at a few pitches outside the zone, he ends up netting around 7 points of wOBA at 0-0.</p>
+<p>Clearly, Lucroy is taking too many pitches over the middle of the plate: as a result, he loses about 9 points of wOBA. Khris Davis swings at most of these pitches, and while he also swings at a few pitches outside the zone, he ends up netting around 8 points of wOBA at 0-0.</p>
 </div>
 <div id="results-full-count" class="section level2">
 <h2>Results: Full count</h2>
@@ -1345,61 +1377,61 @@ knitr::kable(full_count %&gt;% top_n(10, `2019`) %&gt;% arrange(desc(`2019`)), d
 <td align="left">Luke Voit</td>
 <td align="right">NA</td>
 <td align="right">NA</td>
-<td align="right">0.071</td>
+<td align="right">0.090</td>
 </tr>
 <tr class="even">
+<td align="left">Wilson Ramos</td>
+<td align="right">NA</td>
+<td align="right">0.020</td>
+<td align="right">0.079</td>
+</tr>
+<tr class="odd">
 <td align="left">Howie Kendrick</td>
 <td align="right">NA</td>
 <td align="right">NA</td>
-<td align="right">0.070</td>
-</tr>
-<tr class="odd">
-<td align="left">Wilson Ramos</td>
-<td align="right">NA</td>
-<td align="right">0.023</td>
-<td align="right">0.068</td>
+<td align="right">0.069</td>
 </tr>
 <tr class="even">
-<td align="left">Ji-Man Choi</td>
-<td align="right">NA</td>
-<td align="right">0.020</td>
-<td align="right">0.067</td>
+<td align="left">Mitch Moreland</td>
+<td align="right">-0.012</td>
+<td align="right">0.033</td>
+<td align="right">0.064</td>
 </tr>
 <tr class="odd">
-<td align="left">Robbie Grossman</td>
-<td align="right">0.054</td>
-<td align="right">0.039</td>
+<td align="left">Joey Gallo</td>
+<td align="right">0.032</td>
+<td align="right">0.067</td>
 <td align="right">0.063</td>
 </tr>
 <tr class="even">
-<td align="left">Billy Hamilton</td>
-<td align="right">0.016</td>
-<td align="right">-0.030</td>
-<td align="right">0.061</td>
-</tr>
-<tr class="odd">
 <td align="left">Cavan Biggio</td>
 <td align="right">NA</td>
 <td align="right">NA</td>
-<td align="right">0.060</td>
-</tr>
-<tr class="even">
-<td align="left">Robinson Chirinos</td>
-<td align="right">0.004</td>
-<td align="right">0.025</td>
-<td align="right">0.059</td>
+<td align="right">0.062</td>
 </tr>
 <tr class="odd">
-<td align="left">David Bote</td>
+<td align="left">Ji-Man Choi</td>
 <td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">0.059</td>
+<td align="right">0.024</td>
+<td align="right">0.061</td>
 </tr>
 <tr class="even">
-<td align="left">Joey Gallo</td>
-<td align="right">0.024</td>
+<td align="left">Brandon Belt</td>
+<td align="right">0.021</td>
+<td align="right">0.020</td>
 <td align="right">0.056</td>
-<td align="right">0.057</td>
+</tr>
+<tr class="odd">
+<td align="left">Ben Gamel</td>
+<td align="right">-0.010</td>
+<td align="right">NA</td>
+<td align="right">0.055</td>
+</tr>
+<tr class="even">
+<td align="left">Shin-Soo Choo</td>
+<td align="right">0.045</td>
+<td align="right">0.055</td>
+<td align="right">0.055</td>
 </tr>
 </tbody>
 </table>
@@ -1416,33 +1448,33 @@ knitr::kable(full_count %&gt;% top_n(10, `2019`) %&gt;% arrange(desc(`2019`)), d
 <tbody>
 <tr class="odd">
 <td align="left">Javier Baez</td>
-<td align="right">-0.070</td>
-<td align="right">-0.047</td>
-<td align="right">-0.122</td>
+<td align="right">-0.069</td>
+<td align="right">-0.044</td>
+<td align="right">-0.103</td>
 </tr>
 <tr class="even">
 <td align="left">Shohei Ohtani</td>
 <td align="right">NA</td>
-<td align="right">-0.015</td>
-<td align="right">-0.092</td>
+<td align="right">-0.025</td>
+<td align="right">-0.086</td>
 </tr>
 <tr class="odd">
+<td align="left">Colin Moran</td>
+<td align="right">NA</td>
+<td align="right">0.013</td>
+<td align="right">-0.067</td>
+</tr>
+<tr class="even">
 <td align="left">Matt Adams</td>
 <td align="right">NA</td>
 <td align="right">NA</td>
-<td align="right">-0.086</td>
-</tr>
-<tr class="even">
-<td align="left">Colin Moran</td>
-<td align="right">NA</td>
-<td align="right">0.027</td>
-<td align="right">-0.082</td>
+<td align="right">-0.063</td>
 </tr>
 <tr class="odd">
-<td align="left">Jose Abreu</td>
-<td align="right">-0.054</td>
-<td align="right">-0.023</td>
-<td align="right">-0.073</td>
+<td align="left">Maikel Franco</td>
+<td align="right">-0.001</td>
+<td align="right">-0.040</td>
+<td align="right">-0.063</td>
 </tr>
 </tbody>
 </table>
@@ -1498,13 +1530,14 @@ Jason Willwerscheid
 </table>
 </div>
 </div>
-<p>Voit almost always takes on 3-2, while Baez chases a lot of bad pitches. As a result, Voit gains an expected 71 points of wOBA, while Baez loses a whopping 122. (I emphasize that this is only for PAs that reach full count: it does not subtract 122 points from Baez’s total wOBA, but rather, since only around 11% of his PAs reach full count, the overall penalty is 14 points.)</p>
+<p>Voit almost always takes on 3-2, while Baez chases a lot of bad pitches. As a result, Voit gains an expected 90 points of wOBA, while Baez loses a whopping 103. (I emphasize that this is only for PAs that reach full count: it does not subtract 103 points from Baez’s total wOBA; rather, since only around 11% of his PAs reach full count, the overall penalty is 11 points.)</p>
 </div>
 <div id="appendix-pitch-selection" class="section level2">
 <h2>Appendix: Pitch selection</h2>
-<p>Incidentally, the estimates of average swinging behavior allow us to say something about where a pitcher should locate a pitch when facing an average hitter. In the plots below, the red areas are favorable for the pitcher, while the green areas give an advantage to the hitter. The upshot: it’s best to pitch over the middle of the plate until there’s one strike; with more strikes, the pitcher can start to locate pitches at the edges of the strike zone; in any case, though, it’s a very bad idea to pitch off of the plate when there are three balls. Even at 3-2, a pitcher should prefer the middle of the strike zone to a pitch off of the plate.</p>
+<p>Incidentally, the estimates of average swinging behavior allow us to say something about where a pitcher should locate a pitch when facing an average hitter. The plots below are for four-seamers: the red areas are favorable for the pitcher, while the green areas give an advantage to the hitter. The upshot: it’s best to pitch near the middle of the plate until there’s one strike; with more strikes, the pitcher should start to locate pitches at the edges of the strike zone; in any case, though, it’s a very bad idea to pitch off of the plate when there are three balls. Even at 3-2, a pitcher should prefer the middle of the strike zone to a pitch off of the plate.</p>
 <p>(Of course, these recommendations can be improved when the hitter’s specific preferences are known. I plan to tackle this problem in a future analysis.)</p>
 <pre class="r"><code>plot_df &lt;- all_pitches %&gt;%
+  filter(pitch_type == &quot;FF&quot;) %&gt;%
   group_by(balls, strikes, plate_x, plate_z) %&gt;%
   summarize(avg_wOBA_chg = mean(avg_wOBA_chg)) %&gt;%
   ungroup() %&gt;%
