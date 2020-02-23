@@ -1,8 +1,10 @@
 ---
-title: "Ball, strike, foul, and hit-into-play values"
+title: "Ball, strike, foul, and barrel values"
 author: "Jason Willwerscheid"
 date: "2/20/2020"
-output: html_document
+output:
+  workflowr::wflow_html:
+    code_folding: hide
 ---
 
 ```{r setup, include=FALSE}
@@ -11,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, comment = "#>")
 
 ## Count-specific wOBA
 
-I calculate expected wOBA conditional on the pitch count (the idea is described in Tango, Lichtman, and Dolphin). To account for the juicier balls of 2017 and 2019, I want these on a per-year basis, but for less frequent pitch counts like 3-0, the standard errors associated with the empirical means are a bit too large for my taste. Thus I make the additional assumption that year-to-year differences are constant across pitch counts. (I could have also assumed that the ratios are constant, but differences are easier to interpret.) I give the complete table below: one can verify that the fitted wOBA values are all very reasonable given the empirical wOBAs and SEs, and they have the convenient property that 2017 values are all one point higher than 2019 values, which are in turn 8 points higher than 2018 values.
+I calculate expected wOBA conditional on the pitch count (the idea is described in Tango, Lichtman, and Dolphin). To account for the juicier balls of 2017 and 2019, I want these on a per-year basis, but for less frequent pitch counts like 3-0, the standard errors associated with the empirical means are a bit too large for my taste. Thus I make the additional assumption that year-to-year differences are constant across pitch counts. (I could have also assumed that the ratios are constant, but differences are easier to interpret.) As an example, I give the empirical and fitted values for 3-0 below: one can verify that the fitted wOBA values are all very reasonable given the empirical wOBAs and SEs:
 
 ```{r count_woba}
 suppressMessages(library(tidyverse))
@@ -32,36 +34,45 @@ count_woba <- count_woba %>%
   mutate(fitted_wOBA = lm_preds, 
          diff = fitted_wOBA - empirical_wOBA)
 
-knitr::kable(count_woba, digits = 3)  
+knitr::kable(count_woba %>% filter(balls == 3, strikes == 0), digits = 3)
+```
+
+The full table for 2019 is:
+```{r count_woba2}
+count_woba <- count_woba %>%
+  rename(wOBA = fitted_wOBA) %>%
+  select(game_year, balls, strikes, wOBA)
+
+knitr::kable(count_woba %>% filter(game_year == 2019), digits = 3)  
+```
+
+## wOBACON
+
+I calculate expected wOBACON separately for balls that are barreled and those that aren't:
+
+```{r wobacon}
+wobacon <- all_pitches %>%
+  filter(contact == 1, foul == 0) %>%
+  group_by(game_year, barrel) %>%
+  summarize(wOBACON = sum(pa_woba_value) / sum(pa_woba_denom)) %>%
+  ungroup() %>%
+  spread(key = barrel, value = wOBACON) %>%
+  rename(nonbrl_wOBACON = `0`, barrel_wOBACON = `1`)
+
+knitr::kable(wobacon, digits = 3)
 ```
 
 ## wOBA values for pitch events
 
-Next, using the wOBACON calculated [here](countloc_pitchloc.html), I calculate the value of a ball, strike, foul ball, and hit into play conditional on the pitch count (and also conditional on pitch type and location, since the wOBACON depends on these features). 
-
-For example, consider the following pitch:
-
-```{r ex}
-set.seed(60666)
-ex <- all_pitches %>%
-  select(game_year:plate_z, wOBACON) %>%
-  sample_n(1)
-knitr::kable(ex, digits = 3)
-```
-
-In 2018, an 0-2 count is associated with an expected wOBA of 0.205. A ball will bring the count to 1-2, which has a wOBA of 0.228, so the value of a ball at 0-2 is 0.023. (And, due to the convenient assumption I made above, this value is constant from year to year.) A strike will result in a strikeout, which brings the wOBA down to zero: thus the value of a strike at 0-2 is -0.205. A foul ball does not change the count, so its value is zero. Finally, since the pitch is a four-seamer outside, it has a relatively modest conditional wOBACON of 0.377, which yields a hit-into-play value of 0.172.
+Finally, I calculate the value of a ball, strike, foul ball, non-barreled ball, and barreled ball conditional on the pitch count. 
 
 ```{r event_vals}
-event_vals <- count_woba %>%
-  rename(wOBA = fitted_wOBA) %>%
-  select(game_year, balls, strikes, wOBA)
-
 helper_df <- tibble(balls = 4, strikes = 0:2, wOBA = 1, dummy = 1) %>%
   bind_rows(tibble(strikes = 3, balls = 0:3, wOBA = 0, dummy = 1)) %>%
-  full_join(tibble(game_year = 2017:2019, dummy = 1), by = "dummy") %>%
+  full_join(tibble(game_year = 2015:2019, dummy = 1), by = "dummy") %>%
   select(-dummy)
 
-event_vals <- event_vals %>%
+event_vals <- count_woba %>%
   bind_rows(helper_df) 
 event_vals <- event_vals %>%
   left_join(event_vals, by = "game_year", suffix = c("", "_next")) %>%
@@ -78,11 +89,18 @@ event_vals <- event_vals %>%
 event_vals <- event_vals %>%
   mutate(foul_value = ifelse(strikes == 2, 0, strike_value))
 
+# Balls in play:
+event_vals <- event_vals %>%
+  left_join(wobacon, by = "game_year") %>%
+  mutate(nonbrl_value = nonbrl_wOBACON - wOBA,
+         barrel_value = barrel_wOBACON - wOBA) %>%
+  select(-wOBA, -nonbrl_wOBACON, -barrel_wOBACON)
+
 all_pitches <- all_pitches %>%
-  left_join(event_vals, by = c("game_year", "balls", "strikes")) %>%
-  mutate(HIP_value = wOBACON - wOBA) %>%
-  select(-wOBA)
+  left_join(event_vals, by = c("game_year", "balls", "strikes"))
 ```
+
+
 
 ```{r save_res}
 saveRDS(all_pitches, "output/mlb_eventvals.rds")
