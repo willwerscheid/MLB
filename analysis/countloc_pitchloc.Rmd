@@ -1,37 +1,43 @@
 ---
-title: "wOBACON and swing, called strike, contact, and foul probabilities"
+title: "Swing, called strike, contact, foul, and barrel probabilities"
 author: "Jason Willwerscheid"
 date: "2/20/2020"
-output: html_document
+output:
+  workflowr::wflow_html:
+    code_folding: hide
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, comment = "#>")
 ```
 
-My basic strategy is to condition my wOBACON and all of my probabilities on pitch location and, when it makes sense, pitch count and pitch type.
+My basic strategy is to condition all of my probabilities on pitch location and, when it makes sense, pitch count and pitch type.
 
-I need four probabilities:
+I need five sets of probabilities:
 
-* The probability that a pitch will be called a strike, given that the batter doesn't swing.
-* The probability that an average batter will make contact with a pitch, given that the batter does swing.
+* The probability that an average batter will swing at the pitch.
+* The probability that the pitch will be called a strike, given that the batter doesn't swing.
+* The probability that an average batter will make contact with the pitch, given that the batter does swing.
 * The probability that the ball will be hit foul, given that the batter makes contact.
-* The probability that an average batter swings at a pitch.
+* The probability that the ball will be barreled, given that the batter makes contact.
 
-I condition swing probabilities on pitch count, but I make the simplifying assumption that the first three probabilities are independent of the pitch count. This is not strictly true: for example, umpires are more reluctant to call strike three than strikes one and two; and hitters can afford to be choosier when the count is in their favor, so that contact rates are higher for hitter's counts.
+I condition everything on pitch type except for called strike probabilities. I condition swing probabilities on pitch count, and I condition strike probabilities on whether or not there are already two strikes (on average, umpires are slightly more reluctant to call strike three than strikes one and two). All probabilities are estimated by binning and calculating empirically observed proportions. In a few cases, I needed to coarsify some of the bins to get reasonably smooth probability surfaces. In the plots below, the dashed lines indicate the [theoretical strike zone](https://www.baseballprospectus.com/news/article/37347/robo-strike-zone-not-simple-think/), and the line segment at `plate_z = 0` is home plate.
 
-I condition foul probabilities, swing probabilites, and wOBA on pitch type. Conditioning contact probabilities on pitch type is probably the right thing to do, but doesn't seem to make much of a difference.
 
 ## Called strike probabilities
 
 I first calculate
-$$ p(\text{strike} \mid \text{pitch location, no swing}) $$
-Note that it's not as simple as looking at whether or not a pitch is located in the strike zone: pitches at the corners are much less likely to be called strikes than pitches over the middle of the plate. Thus I estimate probabilities using empirical proportions. In the plot below, the dashed line indicates the [theoretical strike zone](https://www.baseballprospectus.com/news/article/37347/robo-strike-zone-not-simple-think/).
+$$ p(\text{strike = 1} \mid \text{swing = 0, pitch location, I(strikes = 2)}) $$
 
 ```{r looks}
 suppressMessages(library(tidyverse))
 
 all_pitches <- readRDS("output/mlb_preproc.rds")
+
+bins <- all_pitches %>%
+  group_by(plate_x, plate_z, bin_ID, bin_type) %>%
+  summarize() %>%
+  ungroup()
 
 plate_left <- -8.5 / 12
 plate_right <- 8.5 / 12
@@ -42,251 +48,174 @@ sz_top <- 42.47 / 12
 
 looks <- all_pitches %>%
   filter(swing == 0) %>%
-  group_by(plate_x, plate_z) %>%
+  group_by(bin_ID, two_strikes = (strikes == 2)) %>%
   summarize(p_strike = sum(called_strike) / sum(swing == 0)) %>%
   ungroup()
 
-ggplot(looks, aes(x = plate_x, y = plate_z, fill = p_strike)) + 
+ggplot(bins %>% left_join(looks, by = "bin_ID"), 
+       aes(x = plate_x, y = plate_z, fill = p_strike)) + 
   geom_tile() +
   scale_fill_gradient2(high = "dark green") +
+  theme_minimal() +
   geom_rect(aes(xmin = sz_left, xmax = sz_right, ymin = sz_bot, ymax = sz_top),
                 col = "black", linetype = "dashed", alpha = 0) +
-  geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0))
+  geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0)) +
+  facet_wrap(~two_strikes, 
+             labeller = labeller(two_strikes = c("FALSE" = "0-1 strikes", 
+                                                 "TRUE" = "2 strikes")))
 ```
+
 
 ## Contact probabilities
 
 Next I calculate
-$$ p(\text{contact} \mid \text{pitch location, swing}) $$
-Recall that I flipped the $x$-axis for left-handed hitters, so there's no need to condition on handedness. The empirical probabilities appear as follows:
+$$ p(\text{contact = 1} \mid \text{swing = 1, pitch location, pitch type}) $$
+Recall that I flipped the $x$-axis for left-handed hitters, so there's no need to condition on handedness.
 
 ```{r contact}
 contact <- all_pitches %>%
-  group_by(plate_x, plate_z) %>%
-  summarize(n = sum(swing == 1), 
-            p_contact = ifelse(sum(swing == 1) == 0, 0, 
-                               sum(contact == 1) / sum(swing == 1))) %>%
+  group_by(bin_ID, pitch_type) %>%
+  summarize(p_contact = ifelse(sum(swing) == 0, 0, sum(contact) / sum(swing))) %>%
   ungroup() 
 
-ggplot(contact, aes(x = plate_x, y = plate_z, fill = p_contact)) + 
+ggplot(bins %>% left_join(contact, by = "bin_ID"), 
+       aes(x = plate_x, y = plate_z, fill = p_contact)) + 
   geom_tile() +
   scale_fill_gradient2(high = "dark green") +
+  theme_minimal() +
   geom_rect(aes(xmin = sz_left, xmax = sz_right, ymin = sz_bot, ymax = sz_top),
                 col = "black", linetype = "dashed", alpha = 0) +
-  geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0))
+  geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0)) +
+  facet_wrap(~pitch_type, nrow = 3, ncol = 2)
 ```
 
-These estimates are pretty noisy for pitches that are high and outside (some of these bins have as few as 20 to 30 observations). A very small amount of smoothing goes a long way (I essentially force each bin to use at least 100 observations, borrowing observations from nearby bins when necessary):
-
-```{r smooth_contact}
-# knn smoothing
-smooth_probs <- function(x, y, n, p, k) {
-  dist_mat <- outer(x, x, `-`)^2 + outer(y, y, `-`)^2
-  smoothed_probs <- apply(dist_mat, 1, function(x) {
-    dist_order <- order(x)
-    obs_cumsum <- cumsum(n[dist_order])
-    n_bins <- min(which(obs_cumsum >= k))
-    dist_order <- dist_order[1:n_bins]
-    return(sum(n[dist_order] * p[dist_order]) / sum(n[dist_order]))
-  })
-  return(smoothed_probs)
-}
-
-smooth_contact <- contact %>%
-  mutate(p_contact = smooth_probs(plate_x, plate_z, n, p_contact, k = 100)) %>%
-  select(-n)
-
-ggplot(smooth_contact, aes(x = plate_x, y = plate_z, fill = p_contact)) + 
-  geom_tile() +
-  scale_fill_gradient2(high = "dark green") +
-  geom_rect(aes(xmin = sz_left, xmax = sz_right, ymin = sz_bot, ymax = sz_top),
-                col = "black", linetype = "dashed", alpha = 0) +
-  geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0))
-```
-
-I considered estimating different contact probabilities for different pitch types, but initial attempts to do so weren't very promising. The probabilities turn out to be very similar across pitch types, with the notable exception that changeups induce more contact than fastballs when they're up in the zone. However, the estimates are extremely noisy and are not terribly amenable to smoothing.
 
 ## Foul probabilities
 
 Next up is
-$$ p(\text{foul} \mid \text{pitch location, contact}) $$
-
-Foul probabilities do seem to vary quite a bit by pitch type. Getting the smoothing right requires some tinkering:
+$$ p(\text{foul = 1} \mid \text{contact = 1, pitch location, pitch type}) $$
 
 ```{r fouls}
 fouls <- all_pitches %>%
-  filter(contact == 1) %>%
-  group_by(plate_x, plate_z, pitch_type) %>%
-  summarize(n = n(), p_foul = sum(foul) / n()) %>%
-  ungroup() %>%
-  group_by(pitch_type) %>%
-  mutate(p_foul = smooth_probs(plate_x, plate_z, n, p_foul, k = 1000)) %>%
-  select(-n)
+  group_by(bin_ID, pitch_type) %>%
+  summarize(p_foul = ifelse(sum(contact) == 0, 0, sum(foul) / sum(contact))) %>%
+  ungroup() 
 
-ggplot(fouls, aes(x = plate_x, y = plate_z, fill = p_foul)) + 
+ggplot(bins %>% left_join(fouls, by = "bin_ID"), 
+       aes(x = plate_x, y = plate_z, fill = p_foul)) + 
   geom_tile() +
   scale_fill_gradient2(high = "dark green") +
+  theme_minimal() +
   geom_rect(aes(xmin = sz_left, xmax = sz_right, ymin = sz_bot, ymax = sz_top),
                 col = "black", linetype = "dashed", alpha = 0) +
   geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0)) +
-  facet_wrap(~pitch_type)
+  facet_wrap(~pitch_type, nrow = 3, ncol = 2)
 ```
+
+
+## Barrel probabilities
+
+Next is
+$$ p(\text{barrel = 1} \mid \text{contact = 1, pitch location, pitch type}) $$
+
+Since barrels are in general low-probability events, I needed to coarsify the bins for all pitch types.
+
+```{r barrels}
+barrels <- all_pitches %>%
+  group_by(bin_ID, pitch_type) %>%
+  summarize(n = sum(contact), 
+            p_barrel = ifelse(sum(contact) == 0, 0, sum(barrel) / sum(contact))) %>%
+  ungroup() 
+
+sub_bins <- bins %>%
+  mutate(coarse_x = ifelse((plate_x * 5) %% 2 == 0, plate_x - 0.2, plate_x),
+         coarse_z = ifelse((plate_z * 5) %% 2 == 0, plate_z + 0.2, plate_z),
+         coarse_bin = ifelse(bin_type == "octant",
+                             sapply(str_split(bin_ID, ":"), `[[`, 1),
+                             paste(coarse_x, coarse_z, sep = ","))) %>%
+  select(bin_ID, coarse_bin) %>%
+  distinct()
+
+barrels <- barrels %>%
+  left_join(sub_bins, by = c("bin_ID")) %>%
+  group_by(coarse_bin, pitch_type) %>%
+  mutate(p_barrel = sum(p_barrel * n) / sum(n)) %>%
+  ungroup()
+
+barrels <- barrels %>%
+  select(-n, -coarse_bin)
+
+ggplot(bins %>% left_join(barrels, by = "bin_ID"), 
+       aes(x = plate_x, y = plate_z, fill = p_barrel)) + 
+  geom_tile() +
+  scale_fill_gradient2(high = "dark green") +
+  theme_minimal() +
+  geom_rect(aes(xmin = sz_left, xmax = sz_right, ymin = sz_bot, ymax = sz_top),
+                col = "black", linetype = "dashed", alpha = 0) +
+  geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0)) +
+  facet_wrap(~pitch_type, nrow = 3, ncol = 2)
+```
+
 
 ## Swing probabilities
 
-Instead of modeling swing probabilities nonparametrically, I fit a GLM so that I can condition on both pitch type and pitch count. (Using nonparametric estimates would mean calculating $12 * 5 = 60$ sets of empirical proportions, and results would be very noisy.) An inspection of the marginal probabilites suggests that this is a reasonable approach:
+It remains to calculate
+
+$$ p(\text{swing = 1} \mid \text{pitch count, pitch location, pitch type}) $$
 
 ```{r swings}
-count_df <- all_pitches %>%
-  group_by(balls, strikes, plate_x, plate_z) %>%
-  summarize(p_swing = sum(swing) / n()) %>%
-  ungroup %>%
-  mutate(pitch_count = paste(balls, strikes, sep = "-"))
-ggplot(count_df, aes(x = plate_x, y = plate_z, fill = p_swing)) +
-  geom_tile() +
-  scale_fill_gradient2(high = "dark green") +
-  facet_wrap(~pitch_count, nrow = 4, ncol = 3) +
-  geom_rect(aes(xmin = sz_left, xmax = sz_right, ymin = sz_bot, ymax = sz_top),
-                col = "black", linetype = "dashed", alpha = 0) +
-  geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0))
-```
-
-```{r swings2}
-ptype_df <- all_pitches %>%
-  group_by(pitch_type, plate_x, plate_z) %>%
-  summarize(p_swing = sum(swing) / n()) %>%
+swings <- all_pitches %>%
+  group_by(bin_ID, bin_type, pitch_type, balls, strikes) %>%
+  summarize(n = n(), p_swing = sum(swing) / n()) %>%
   ungroup
-ggplot(ptype_df, aes(x = plate_x, y = plate_z, fill = p_swing)) +
-  geom_tile() +
-  scale_fill_gradient2(high = "dark green") +
-  facet_wrap(~pitch_type, nrow = 3, ncol = 2) +
-  geom_rect(aes(xmin = sz_left, xmax = sz_right, ymin = sz_bot, ymax = sz_top),
-                col = "black", linetype = "dashed", alpha = 0) +
-  geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0))
+
+# Coarsify bins for 3-0, 3-1, and 2-0:
+swings <- swings %>%
+  left_join(sub_bins, by = c("bin_ID")) %>%
+  group_by(coarse_bin, pitch_type, balls, strikes) %>%
+  mutate(p_swing = ifelse(balls - strikes > 1, 
+                          sum(p_swing * n) / sum(n), p_swing)) %>%
+  ungroup()
+
+# Coarsify again for off-speed pitches throw at 3-0:
+swings <- swings %>%
+  group_by(bin_type, pitch_type, balls, strikes) %>%
+  mutate(p_swing = ifelse(bin_type == "coord" & balls == 3 & strikes == 0 &
+                            pitch_type %in% c("CU", "CH", "SL"),
+                          sum(p_swing * n) / sum(n), p_swing)) %>%
+  ungroup() 
+
+swings <- swings %>%
+  select(-n, -bin_type, -coarse_bin)
+  
+for (next_type in c("FF", "FT", "SL", "CH", "CU")) {
+  plot_df <- bins %>% 
+    left_join(swings, by = "bin_ID") %>% 
+    filter(pitch_type == next_type) %>%
+    mutate(pitch_count = paste(balls, strikes, sep = "-"))
+  
+  plt <- ggplot(plot_df, aes(x = plate_x, y = plate_z, fill = p_swing)) +
+    geom_tile() +
+    scale_fill_gradient2(high = "dark green") +
+    facet_wrap(~pitch_count, nrow = 4, ncol = 3) +
+    geom_rect(aes(xmin = sz_left, xmax = sz_right, ymin = sz_bot, ymax = sz_top),
+              col = "black", linetype = "dashed", alpha = 0) +
+    geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0)) +
+    ggtitle(paste("Pitch Type:", next_type))
+  plot(plt)
+}
 ```
 
-In all cases, the regions of hitter preference are roughly elliptical, so that I ought to be able to model swing probabilites using a binomial GLM with second-degree polynomial coefficients for `plate_x` and `plate_z` (as well as an interaction term). I include interactions between pitch type and pitch location, but no interactions with pitch count.
-
-```{r swings_glm}
-swing_fit <- glm(swing ~ (poly(plate_x, 2) + poly(plate_z, 2) + plate_x:plate_z) * pitch_type + 
-                   factor(balls) * factor(strikes),
-                 family = "binomial", data = all_pitches)
-```
-
-One can verify that the fitted probabilities closely agree with the empirical proportions plotted above. Fitted probabilities for four-seamers are as follows:
-
-```{r swings3}
-glm_count_df <- count_df %>%
-  mutate(pitch_type = "FF")
-count_preds <- predict(swing_fit, newdata = glm_count_df, type = "response")
-glm_count_df <- glm_count_df %>%
-  mutate(p_swing = count_preds)
-ggplot(glm_count_df, aes(x = plate_x, y = plate_z, fill = p_swing)) +
-  geom_tile() +
-  scale_fill_gradient2(high = "dark green") +
-  facet_wrap(~pitch_count, nrow = 4, ncol = 3) +
-  geom_rect(aes(xmin = sz_left, xmax = sz_right, ymin = sz_bot, ymax = sz_top),
-                col = "black", linetype = "dashed", alpha = 0) +
-  geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0))
-```
-
-At 1-1, fitted probabilities for various pitch types are as follows:
-
-```{r swings4}
-glm_ptype_df <- ptype_df %>%
-  mutate(balls = 1, strikes = 1)
-ptype_preds <- predict(swing_fit, newdata = glm_ptype_df, type = "response")
-glm_ptype_df <- glm_ptype_df %>%
-  mutate(p_swing = ptype_preds)
-ggplot(glm_ptype_df, aes(x = plate_x, y = plate_z, fill = p_swing)) +
-  geom_tile() +
-  scale_fill_gradient2(high = "dark green") +
-  facet_wrap(~pitch_type, nrow = 3, ncol = 2) +
-  geom_rect(aes(xmin = sz_left, xmax = sz_right, ymin = sz_bot, ymax = sz_top),
-                col = "black", linetype = "dashed", alpha = 0) +
-  geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0))
-```
-
-## wOBACON
-
-Estimating wOBACON conditional on pitch type and location is the trickiest step, especially since it's usual to assume that it also varies by year. My approach is admittedly pretty ad hoc. First I estimate barrel probability by pitch location, independent of pitch type. Some smoothing is already necessary at this stage: 
-
-```{r wobacon}
-inplay <- all_pitches %>%
-  filter(contact == 1 & foul == 0 & pa_woba_denom > 0 & !is.na(barrel))
-
-barrels_by_loc <- inplay %>%
-  group_by(plate_x, plate_z) %>%
-  summarize(n = n(), p_barrel = mean(barrel)) %>%
-  ungroup() %>%
-  mutate(p_barrel = smooth_probs(plate_x, plate_z, n, p_barrel, k = 1000)) %>%
-  select(-n)
-
-ggplot(barrels_by_loc, aes(x = plate_x, y = plate_z, fill = p_barrel)) + 
-  geom_tile() +
-  scale_fill_gradient2(high = "dark green") +
-  geom_rect(aes(xmin = sz_left, xmax = sz_right, ymin = sz_bot, ymax = sz_top),
-                col = "black", linetype = "dashed", alpha = 0) +
-  geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0))
-```
-
-Next, I estimate odds multipliers for each pitch type. This method gives the pitch-type-specific probabilites the same general shape, so to speak, but different magnitudes:
-
-```{r wobacon2}
-barrel_data <- inplay %>%
-  left_join(barrels_by_loc, by = c("plate_x", "plate_z")) %>%
-  filter(p_barrel > 0)
-
-barrel_fit <- glm(barrel ~ -1 + pitch_type + 
-                    offset(log(p_barrel /(1 - p_barrel))), 
-                  family = "binomial", data = barrel_data)
-round(exp(coef(barrel_fit)), digits = 2)
-```
-
-Four-seamers are the easiest balls to crush: if a hitter sees one, then the odds of barreling it are 17% higher than the mean for all pitches in the same location. Curveballs and, surprisingly, two-seamers are the most difficult to get a handle on.
-
-The last step is to estimate year-to-year wOBACON separately for barreled balls and non-barreled balls:
-
-```{r wobacon3}
-wobacon <- inplay %>%
-  group_by(game_year, barrel) %>%
-  summarize(wOBACON = mean(pa_woba_value)) %>%
-  spread(key = barrel, value = wOBACON) %>%
-  rename(wOBAwk = `0`, wOBAbrl = `1`)
-knitr::kable(wobacon, digits = 3)
-```
-
-The wOBACON for each pitch can then be estimated as:
-$$ p_{\text{barrel}} \mathbb{E}(\text{wOBACON} \mid \text{year}, \text{barrel} = 1) + (1 - p_{\text{barrel}}) \mathbb{E}(\text{wOBACON} \mid \text{year}, \text{barrel} = 0), $$
-where
-$$ \frac{p_{\text{barrel}}}{1 - p_{\text{barrel}}} = 
-\alpha_{\text{pitch_type}} * \frac{\mathbb{P}({\text{barrel}} \mid \text{pitch_loc})}{1 - \mathbb{P}({\text{barrel}} \mid \text{pitch_loc})}, $$
-with $\alpha_{\text{pitch_type}}$ corresponding to the multipliers given above.
 
 ```{r save_res}
 all_pitches <- all_pitches %>%
-  left_join(looks, by = c("plate_x", "plate_z")) %>%
-  left_join(smooth_contact, by = c("plate_x", "plate_z")) %>%
-  left_join(fouls, by = c("plate_x", "plate_z", "pitch_type")) %>%
-  mutate(p_swing = fitted(swing_fit))
-
-# Values of p_foul are NA for locations where no batters swung. These can be safely
-#   set to zero.
-all_pitches <- all_pitches %>%
-  mutate(p_foul = ifelse(is.na(p_foul), 0, p_foul))
-
-all_pitches <- all_pitches %>%
-  left_join(barrels_by_loc, by = c("plate_x", "plate_z")) %>%
-  mutate(p_barrel = ifelse(is.na(p_barrel), 0, p_barrel)) 
-
-# Pitch type multiplier:
-all_pitches <- all_pitches %>%
-  mutate(p_barrel = predict(barrel_fit, newdata = all_pitches, type = "response"))
-
-all_pitches <- all_pitches %>%
-  left_join(wobacon, by = "game_year") %>%
-  mutate(wOBACON = p_barrel * wOBAbrl + (1 - p_barrel) * wOBAwk) %>%
-  select(-p_barrel, -wOBAbrl, -wOBAwk)
+  mutate(two_strikes = (strikes == 2)) %>%
+  left_join(looks, by = c("bin_ID", "two_strikes")) %>%
+  left_join(swings, by = c("bin_ID", "pitch_type", "balls", "strikes")) %>%
+  left_join(contact, by = c("bin_ID", "pitch_type")) %>%
+  left_join(fouls, by = c("bin_ID", "pitch_type")) %>%
+  left_join(barrels, by = c("bin_ID", "pitch_type")) %>%
+  select(-two_strikes)
 
 saveRDS(all_pitches, "output/mlb_wprobs.rds")
 ```
