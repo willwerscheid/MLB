@@ -2,7 +2,9 @@
 title: "Preprocessing"
 author: "Jason Willwerscheid"
 date: "2/20/2020"
-output: html_document
+output:
+  workflowr::wflow_html:
+    code_folding: show
 ---
 
 ```{r setup, include=FALSE}
@@ -11,12 +13,12 @@ knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, comment = "#>")
 
 ## Scrape data
 
-I used the `baseballr` package to scrape Statcast data from seasons 2017-2019. Since Statcast will only return a few days' worth of data at a time, a loop is required. For example, I scraped the 2017 data as follows:
+I used the `baseballr` package to scrape Statcast data from seasons 2015-2019. Since Statcast will only return a few days' worth of data at a time, a loop is required. For example, I scraped the 2015 data as follows:
 
 ```{r scrape, eval = FALSE}
 # Not run:
-season_begin <- as.Date("2017-04-02")
-season_end <- as.Date("2017-11-01")
+season_begin <- as.Date("2015-04-05")
+season_end <- as.Date("2015-11-01")
 
 dat <- tibble()
 start_date <- season_begin
@@ -27,19 +29,23 @@ while (start_date <= season_end) {
                                                            end_date = start_date + 6))
   start_date <- start_date + 7
 }
-saveRDS(dat, "data/mlb2017data.rds")
+saveRDS(dat, "data/mlb2015data.rds")
 ```
 
 ## Remove pitchers who hit and hitters who pitch
 
-Since I want to capture average position players' behavior when facing average pitchers, I remove plate appearances where a pitcher is at the plate or where a position player is called in to pitch. I make specific exceptions for two-way players Shohei Ohtani and Michael Lorenzen.
+Since I want to capture average position players' behavior when facing average pitchers, I remove plate appearances where a pitcher is at the plate or where a position player is called in to pitch. I make specific exceptions for two-way players Shohei Ohtani, Michael Lorenzen, and Brendan McKay.
 
 ```{r batvpit}
 suppressMessages(library(tidyverse))
 
 all_pitches <- readRDS("data/mlb2019data.rds") %>%
   bind_rows(readRDS("data/mlb2018data.rds")) %>%
-  bind_rows(readRDS("data/mlb2017data.rds"))
+  bind_rows(readRDS("data/mlb2017data.rds")) %>%
+  bind_rows(readRDS("data/mlb2016data.rds")) %>%
+  bind_rows(readRDS("data/mlb2015data.rds"))
+
+orig_nrow <- nrow(all_pitches)
 
 pitchers <- all_pitches %>%
   group_by(pitcher) %>%
@@ -55,16 +61,16 @@ pitchers <- pitchers %>%
   pull(pitcher)
 
 two_way <- unique(all_pitches$batter[all_pitches$player_name 
-                                     %in% c("Shohei Ohtani", "Michael Lorenzen")])
-
-prev_nrow <- nrow(all_pitches)
+                                     %in% c("Shohei Ohtani", 
+                                            "Michael Lorenzen",
+                                            "Brendan McKay")])
 
 all_pitches <- all_pitches %>%
   filter(pitcher %in% pitchers, 
          batter %in% two_way | !(batter %in% pitchers))
 
 # What percentage of pitches have I removed?
-paste0(round(100 * (prev_nrow - nrow(all_pitches)) / prev_nrow, 1), 
+paste0(round(100 * (orig_nrow - nrow(all_pitches)) / orig_nrow, 1), 
        "% of pitches removed")
 ```
 
@@ -95,22 +101,25 @@ PA_woba <- all_pitches %>%
 all_pitches <- all_pitches %>%
   left_join(PA_woba, by = "PA_ID")
 
-paste0(round(100 * (prev_nrow - nrow(all_pitches)) / prev_nrow, 1), 
+paste0(round(100 * (prev_nrow - nrow(all_pitches)) / orig_nrow, 1), 
        "% of pitches removed")
 ```
 
 ## Remove rare events
 
-I remove pitchouts, HBPs, and batter and catcher interference. There are also a small number of PAs where the count reaches four balls. I don't know whether these are errors in data entry or whether the umpires lost track of the count.
+I remove HBPs, intentional walks, pitchouts, and batter and catcher interference. There are also a small number of PAs where the count reaches four balls. I don't know whether these are errors in data entry or whether the umpires lost track of the count.
 
 ```{r outliers}
 prev_nrow <- nrow(all_pitches)
 
 all_pitches <- all_pitches %>%
-  filter(balls < 4, !(description == "pitchout")) %>%
-  filter(!(events %in% c("hit_by_pitch", "batter_interference", "catcher_interf")))
+  filter(balls < 4, !(description %in% c("intent_ball", "pitchout", 
+                                         "foul_pitchout", "swinging_pitchout", 
+                                         "pitchout_hit_into_play_score"))) %>%
+  filter(!(events %in% c("hit_by_pitch", "intent_walk", 
+                         "batter_interference", "catcher_interf")))
 
-paste0(round(100 * (prev_nrow - nrow(all_pitches)) / prev_nrow, 1), 
+paste0(round(100 * (prev_nrow - nrow(all_pitches)) / orig_nrow, 1), 
        "% of pitches removed")
 ```
 
@@ -129,7 +138,7 @@ all_pitches <- all_pitches %>%
                                 TRUE ~ pitch_type)) %>%
   filter(pitch_type %in% c("CH", "CU", "FF", "FT", "SL"))
   
-paste0(round(100 * (prev_nrow - nrow(all_pitches)) / prev_nrow, 1), 
+paste0(round(100 * (prev_nrow - nrow(all_pitches)) / orig_nrow, 1), 
        "% of pitches removed")  
 ```
 
@@ -143,7 +152,7 @@ prev_nrow <- nrow(all_pitches)
 all_pitches <- all_pitches %>%
   filter(!is.na(plate_x) & !is.na(plate_z))
 
-paste0(round(100 * (prev_nrow - nrow(all_pitches)) / prev_nrow, 1), 
+paste0(round(100 * (prev_nrow - nrow(all_pitches)) / orig_nrow, 1), 
        "% of pitches removed")
 ```
 
@@ -158,17 +167,10 @@ all_pitches <- all_pitches %>%
 
 ## Bin location data
 
-This final step is the most sensitive part of the preprocessing. I'd like to bin the pitch locations to get nonparametric estimates of swing rates and contact rates. I want to use as fine a grid as possible while retaining enough data points per bin to get reasonably accurate estimates. After some fiddling, I settled on bins with widths and heights of 0.2 feet (2.4 inches). I discarded pitches that landed in very sparsely populated bins: these are pitches that are located far off the plate and are easy to lay off of, so they don't tell us much about plate discipline.
-
-In the plot below, the dashed lines indicate the [theoretical strike zone](https://www.baseballprospectus.com/news/article/37347/robo-strike-zone-not-simple-think/). The green bins are the ones that I've retained.
+This final step is the most sensitive part of the preprocessing. I'd like to bin the pitch locations to get nonparametric estimates of swing rates and contact rates. I want to use as fine a grid as possible while retaining enough data points per bin to get reasonably accurate estimates. After some fiddling, I settled on bins with widths and heights of 0.2 feet (2.4 inches). For pitches that are located well outside of the strike zone, I combined bins according to their octant (relative to the center of pitch location mass). I discarded pitches that were more than 2.5 feet away from the center of mass.
 
 ```{r loc}
 prev_nrow <- nrow(all_pitches)
-
-all_pitches <- all_pitches %>%
-  mutate(plate_x = round(plate_x / 2, 1) * 2,
-         plate_z = round(plate_z / 2, 1) * 2) %>%
-  group_by(plate_x, plate_z)
 
 plate_left <- -8.5 / 12
 plate_right <- 8.5 / 12
@@ -177,23 +179,27 @@ sz_right <- plate_right + 2.94 / 2 / 12
 sz_bot <- 15.53 / 12
 sz_top <- 42.47 / 12
 
-ggplot(all_pitches %>% summarize(n = n()), 
-       aes(plate_x, plate_z, fill = n >= 1000, alpha = n)) +
-  geom_tile() + 
-  xlim(c(-5, 5)) +
-  ylim(c(-3, 7)) +
-  theme_minimal() +
-  guides(fill = FALSE, alpha = FALSE) +
-  scale_fill_manual(values = c("grey", "dark green")) +
-  geom_rect(aes(xmin = sz_left, xmax = sz_right, ymin = sz_bot, ymax = sz_top),
-                col = "black", linetype = "dashed", alpha = 0) +
-  geom_segment(aes(x = plate_left, xend = plate_right, y = 0, yend = 0))
-  
 all_pitches <- all_pitches %>%
-  filter(length(plate_x) >= 1000) %>%
-  ungroup()
+  filter(sqrt((plate_x - 0.2)^2 + (plate_z - 2.4)^2) < 2.5) %>%
+  mutate(plate_x = round(plate_x / 2, 1) * 2,
+         plate_z = round(plate_z / 2, 1) * 2)
 
-paste0(round(100 * (prev_nrow - nrow(all_pitches)) / prev_nrow, 1), 
+bins <- all_pitches %>%
+  mutate(dist = ifelse(sqrt((plate_x - 0.2)^2 + (plate_z - 2.4)^2) < 1.5, "inner", "outer"),
+         octant = 4 + ceiling(4 * atan2(plate_z - 2.4, plate_x - 0.2) / pi)) %>%
+  group_by(plate_x, plate_z, dist, octant) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  mutate(bin_ID = case_when(n > 10000 ~ paste(plate_x, plate_z, sep = ","),
+                            TRUE ~ paste(octant, dist, sep = ":")),
+         bin_type = ifelse(n > 10000, "coord", "octant")) %>%
+  select(-n)
+
+all_pitches <- all_pitches %>%
+  left_join(bins, by = c("plate_x", "plate_z")) %>%
+  select(-dist, -octant)
+
+paste0(round(100 * (prev_nrow - nrow(all_pitches)) / orig_nrow, 1), 
        "% of pitches removed")
 ```
 
@@ -205,11 +211,16 @@ Finally, I refactor some variables, remove others, and save the results to file.
 all_pitches <- all_pitches %>%
   mutate(swing = 1L - (description %in% c("ball", "blocked_ball", "called_strike")),
          contact = 1L * (description == "foul" | str_starts(description, "hit_into_play")),
-         foul = 1L * (description %in% c("foul", "foul_pitchout")),
+         foul = 1L * (description == "foul"),
          called_strike = 1L * (description == "called_strike")) %>%
-  select(PA_ID, pa_woba_value, pa_woba_denom, game_year, player_name, balls, strikes, 
-         pitch_type, plate_x, plate_z, swing, contact, foul, called_strike, 
-         barrel)
+  mutate(barrel = ifelse(is.na(barrel), 0, barrel)) %>%
+  select(PA_ID, pa_woba_value, pa_woba_denom, 
+         game_year, player_name, balls, strikes, pitch_type, 
+         bin_ID, bin_type, plate_x, plate_z, 
+         swing, contact, foul, called_strike, barrel,
+         estimated_woba_using_speedangle) %>%
+  rename(xwOBA = estimated_woba_using_speedangle)
 
 saveRDS(all_pitches, "output/mlb_preproc.rds")
 ```
+
