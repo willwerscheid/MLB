@@ -105,19 +105,42 @@ paste0(round(100 * (prev_nrow - nrow(all_pitches)) / orig_nrow, 1),
        "% of pitches removed")
 ```
 
+## Remove PAs that don't count towards a player's wOBA
+
+I remove all pitches from PAs that don't contribute towards a player's wOBA. The bulk of these PAs are intentional walks, sacrifice bunts, and PAs that end prematurely when a runner gets thrown out.
+
+```{r woba_chk}
+prev_nrow <- nrow(all_pitches)
+
+all_pitches <- all_pitches %>%
+  filter(pa_woba_denom > 0) %>%
+  select(-pa_woba_denom)
+
+paste0(round(100 * (prev_nrow - nrow(all_pitches)) / orig_nrow, 1), 
+       "% of pitches removed")
+```
+
 ## Remove rare events
 
-I remove HBPs, intentional walks, pitchouts, and batter and catcher interference. There are also a small number of PAs where the count reaches four balls. I don't know whether these are errors in data entry or whether the umpires lost track of the count.
+I remove intentional balls, pitchouts, batter and catcher interference, and PAs ending in a hit-by-pitch. There are also a small number of PAs where the count reaches four balls. I don't know whether these are errors in data entry or whether the umpires lost track of the count.
 
 ```{r outliers}
 prev_nrow <- nrow(all_pitches)
+
+HBP <- all_pitches %>%
+  group_by(PA_ID) %>%
+  summarize(HBP = any(events == "hit_by_pitch", na.rm = TRUE)) %>%
+  filter(HBP) %>%
+  pull(PA_ID)
+
+all_pitches <- all_pitches %>%
+  filter(!(PA_ID %in% HBP))
 
 all_pitches <- all_pitches %>%
   filter(balls < 4, !(description %in% c("intent_ball", "pitchout", 
                                          "foul_pitchout", "swinging_pitchout", 
                                          "pitchout_hit_into_play_score"))) %>%
-  filter(!(events %in% c("hit_by_pitch", "intent_walk", 
-                         "batter_interference", "catcher_interf")))
+  filter(!(events %in% c("batter_interference", "catcher_interf")))
 
 paste0(round(100 * (prev_nrow - nrow(all_pitches)) / orig_nrow, 1), 
        "% of pitches removed")
@@ -214,8 +237,8 @@ all_pitches <- all_pitches %>%
          foul = 1L * (description == "foul"),
          called_strike = 1L * (description == "called_strike")) %>%
   mutate(barrel = ifelse(is.na(barrel), 0, barrel)) %>%
-  select(PA_ID, pa_woba_value, pa_woba_denom, 
-         game_year, player_name, balls, strikes, pitch_type, 
+  select(PA_ID, pa_woba_value, game_year, player_name, 
+         balls, strikes, pitch_type, 
          bin_ID, bin_type, plate_x, plate_z, 
          swing, contact, foul, called_strike, barrel,
          estimated_woba_using_speedangle) %>%

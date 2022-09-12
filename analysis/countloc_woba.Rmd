@@ -20,15 +20,18 @@ suppressMessages(library(tidyverse))
 
 all_pitches <- readRDS("output/mlb_wprobs.rds")
 
+# TODO: Technically, each PA should only count once; so if a PA stays at 3-2 for several
+#   pitches, it shouldn't be counted more than once.
+
 count_woba <- all_pitches %>%
   group_by(game_year, balls, strikes) %>%
-  summarize(empirical_wOBA = sum(pa_woba_value) / sum(pa_woba_denom),
-            empirical_SE = sd(pa_woba_value[pa_woba_denom > 0]) / sqrt(sum(pa_woba_denom))) %>%
+  summarize(empirical_wOBA = mean(pa_woba_value),
+            empirical_SE = sd(pa_woba_value) / n()) %>%
   ungroup() %>%
   arrange(balls, strikes, game_year)
 
 lm_fit <- lm(pa_woba_value ~ factor(game_year) + factor(balls)*factor(strikes), 
-             data = filter(all_pitches, pa_woba_denom > 0))
+             data = all_pitches)
 lm_preds <- predict(lm_fit, newdata = count_woba)
 count_woba <- count_woba %>%
   mutate(fitted_wOBA = lm_preds, 
@@ -42,6 +45,7 @@ The full table for 2019 is:
 count_woba <- count_woba %>%
   rename(wOBA = fitted_wOBA) %>%
   select(game_year, balls, strikes, wOBA)
+saveRDS(count_woba, "output/count_woba.rds")
 
 knitr::kable(count_woba %>% filter(game_year == 2019), digits = 3)  
 ```
@@ -54,7 +58,7 @@ I calculate expected wOBACON separately for balls that are barreled and those th
 wobacon <- all_pitches %>%
   filter(contact == 1, foul == 0) %>%
   group_by(game_year, barrel) %>%
-  summarize(wOBACON = sum(pa_woba_value) / sum(pa_woba_denom)) %>%
+  summarize(wOBACON = mean(pa_woba_value)) %>%
   ungroup() %>%
   spread(key = barrel, value = wOBACON) %>%
   rename(nonbrl_wOBACON = `0`, barrel_wOBACON = `1`)
@@ -100,8 +104,9 @@ all_pitches <- all_pitches %>%
   left_join(event_vals, by = c("game_year", "balls", "strikes"))
 ```
 
-
+For example, let the count be 3-1 in 2019. This count is associated with an expected wOBA of 0.489. A strike will bring the count to 3-2, which has a wOBA of 0.392, so the value of a strike at 3-1 is -0.097. (And, due to the convenient assumption I made above, this value is constant from year to year.) A ball will result in a walk, which brings the wOBA up to 1: thus the value of a ball is 0.511. Since there are less than two strikes, a foul ball is equivalent to a strike. Finally, the value of hitting the ball into play depends on whether it's barreled or not: if so, the expected wOBACON is 1.279, so the value of the barrel is 0.790; if not, the expected wOBACON is 0.318, which results in a change of -0.172. At 3-1, then, putting the ball into play without barreling it is a much worse outcome than taking a strike!
 
 ```{r save_res}
 saveRDS(all_pitches, "output/mlb_eventvals.rds")
 ```
+
